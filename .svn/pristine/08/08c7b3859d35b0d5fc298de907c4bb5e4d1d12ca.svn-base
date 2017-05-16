@@ -1,0 +1,204 @@
+//
+//  DLWorkChioceViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/15.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLWorkChioceViewController.h"
+#import "DLWorkCollectionViewCell.h"
+#import "DLWorkHeadCollectionReusableView.h"
+#import "DLWorkInfo.h"
+@interface DLWorkChioceViewController ()<UICollectionViewDataSource,UICollectionViewDelegateFlowLayout>
+@property(weak,nonatomic)UICollectionView *collectionView;
+
+@property(strong,nonatomic)DLWorkdetailInfo *WorkDetailInfo;
+
+@property(assign,nonatomic)NSInteger index;
+
+@property(weak,nonatomic)UIButton *button;
+
+@end
+
+@implementation DLWorkChioceViewController
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.titleLabel.text=@"您的职业?";
+    self.baseValue=[DLUserInfo getUserDetail].jobName;
+    [self getWorkData];
+    //1.初始化layout
+    UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+    //设置collectionView滚动方向
+    //    [layout setScrollDirection:UICollectionViewScrollDirectionHorizontal];
+    //设置headerView的尺寸大小
+    layout.headerReferenceSize = CGSizeMake(kScreenW, 40);
+    //该方法也可以设置itemSize
+//    layout.itemSize =CGSizeMake(kScreenW/4.0, 44);
+    
+    //2.初始化collectionView
+    UICollectionView *mainCollectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 60, kScreenW, kScreenH-64-60) collectionViewLayout:layout];
+    [self.view addSubview:mainCollectionView];
+    self.collectionView=mainCollectionView;
+    mainCollectionView.backgroundColor = [UIColor clearColor];
+    
+    //3.注册collectionViewCell
+    //注意，此处的ReuseIdentifier 必须和 cellForItemAtIndexPath 方法中 一致 均为 cellId
+    [mainCollectionView registerNib:[UINib nibWithNibName:NSStringFromClass([DLWorkCollectionViewCell class]) bundle:nil] forCellWithReuseIdentifier:@"workid"];
+//    [mainCollectionView registerClass:[DLWorkCollectionViewCell class] forCellWithReuseIdentifier:@"workid"];
+    
+    //注册headerView  此处的ReuseIdentifier 必须和 cellForItemAtIndexPath 方法中 一致  均为reusableView
+    [mainCollectionView registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"workfoot"];
+    [mainCollectionView registerNib:[UINib nibWithNibName:NSStringFromClass([DLWorkHeadCollectionReusableView class]) bundle:nil] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"workhead"];
+    
+    //4.设置代理
+    mainCollectionView.delegate = self;
+    mainCollectionView.dataSource = self;
+
+}
+
+#pragma mark collectionView代理方法
+//返回section个数
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+{
+    return self.dataArray.count;
+}
+
+//每个section的item个数
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    NSArray *array=self.dataArray[section];
+    return array.count;
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    DLWorkCollectionViewCell *cell = (DLWorkCollectionViewCell *)[collectionView dequeueReusableCellWithReuseIdentifier:@"workid" forIndexPath:indexPath];
+    DLWorkdetailInfo *workdetail=self.dataArray[indexPath.section][indexPath.row];
+    cell.workinfo=workdetail;
+    if ([self.baseValue isEqualToString:workdetail.profName]) {
+        cell.namebutton.selected=YES;
+        self.button=cell.namebutton;
+    }
+    return cell;
+}
+
+//设置每个item的尺寸
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    return CGSizeMake((kScreenW-8)/4.0, 44);
+}
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section;{
+    if (section==2) {
+        return CGSizeMake(kScreenW, 60);
+    }
+    else
+        return CGSizeMake(kScreenH, 10);
+}
+//设置每个item水平间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 2;
+}
+
+
+//设置每个item垂直间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 2;
+}
+
+
+//通过设置SupplementaryViewOfKind 来设置头部或者底部的view，其中 ReuseIdentifier 的值必须和 注册是填写的一致，本例都为 “reusableView”
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+    if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
+        DLWorkHeadCollectionReusableView *headerView = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"workhead" forIndexPath:indexPath];
+        headerView.index=indexPath.section;
+        return headerView;
+    }
+    else
+    {
+        UICollectionReusableView *footView=[collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"workfoot" forIndexPath:indexPath];
+        if (indexPath.section==self.dataArray.count-1) {
+            self.doneButton.frame=CGRectMake(50, 10, kScreenW-100, 40);
+            [footView addSubview:self.doneButton];
+        }
+        return footView;
+    }
+}
+
+
+//点击item方法
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    self.button.selected=NO;
+    DLWorkCollectionViewCell *cell = (DLWorkCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+    cell.namebutton.selected=YES;
+    self.WorkDetailInfo=cell.workinfo;
+    self.index=150001+indexPath.section;
+}
+- (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    DLWorkCollectionViewCell *cell = (DLWorkCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+    cell.namebutton.selected=NO;
+}
+- (void)getWorkData{
+    NSMutableDictionary *dic=[NSMutableDictionary dictionary];
+    dic.transCode=@"M0072";
+    dic.type=@"findAll1";
+    [[GLNetWorkManager shareManager]requestType:POST andURL:REQUESTURL andServers:GET_WORK_TYPE andParmas:dic andComplition:^(id response, BOOL isuccess) {
+        if (isuccess&&[response[@"code"] isEqualToString:SUCCESSCODE]) {
+            [DLWorkdetailInfo mj_setupReplacedKeyFromPropertyName:^NSDictionary *{
+                return @{@"ID":@"id"};
+            }];
+            [DLWorkInfo mj_setupObjectClassInArray:^NSDictionary *{
+                return @{@"qlist":NSStringFromClass([DLWorkdetailInfo class]),
+                         @"zlist":NSStringFromClass([DLWorkdetailInfo class]),
+                         @"wlist":NSStringFromClass([DLWorkdetailInfo class])};
+            }];
+            DLWorkInfo *workInfo=[DLWorkInfo mj_objectWithKeyValues:response];
+            [self.dataArray addObjectsFromArray:@[workInfo.qlist,workInfo.zlist,workInfo.wlist]];
+            [self.collectionView reloadData];
+        }
+        
+        MyLog(@"%@",response);
+    }];
+}
+
+- (void)updateInfofromKey:(NSString *)key andValue:(NSString *)value
+{
+    NSMutableDictionary *updatedic=[NSMutableDictionary dictionary];
+    [updatedic setObject:@"C0100" forKey:@"transCode"];
+    [updatedic setObject:@"update" forKey:@"type"];
+    [updatedic setObject:[DLUserInfo getUser].userId forKey:@"userId"];
+    [updatedic setObject:value forKey:key];
+    [updatedic setObject:@(self.index) forKey:@"jobType"];
+    [[GLNetWorkManager shareManager]requestType:POST andURL:REQUESTURL andServers:GET_WORK_TYPE andParmas:updatedic andComplition:^(id response, BOOL isuccess) {
+        if (isuccess&&[response[@"code"] isEqualToString:SUCCESSCODE]) {
+            if (self.selectFinish) {
+                self.selectFinish(self.WorkDetailInfo.profName);
+                [self getuserinfo];
+                [self.navigationController popViewControllerAnimated:YES];
+            }
+        }
+    }];
+    
+}
+- (void)done
+{
+    [super done];
+    if (self.index) {
+        if (self.type==OtherType) {
+           [self updateInfofromKey:@"job" andValue:self.WorkDetailInfo.code];
+        }
+        else {
+            DLMineBaseViewController *baseVC=[[NSClassFromString(@"DLHeightChioceViewController")alloc]init];
+            baseVC.type=FirstType;
+            [self.navigationController pushViewController:baseVC animated:YES];
+        }
+        
+    }
+}
+@end

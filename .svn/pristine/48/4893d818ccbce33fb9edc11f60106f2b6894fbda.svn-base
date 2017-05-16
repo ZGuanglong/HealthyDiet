@@ -1,0 +1,45 @@
+//
+//  NetWorkManager.m
+//  直播测试
+//
+//  Created by 财神软件 on 17/2/16.
+//  Copyright © 2017年 财神软件. All rights reserved.
+//
+
+#import "GLNetWorkManager.h"
+
+@implementation GLNetWorkManager
+
++ (instancetype)shareManager{
+    static GLNetWorkManager *network;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        network=[[GLNetWorkManager alloc]init];
+        network.responseSerializer=[AFJSONResponseSerializer serializer];
+//        network.requestSerializer = [AFHTTPRequestSerializer serializer];
+        
+        network.responseSerializer.acceptableContentTypes=[NSSet setWithObjects:@"text/html", nil];
+    });
+    return network;
+}
+
+- (void)requestType:(RequestType)type andURL:(NSString *)urlstr andServers:(NSString *)server andParmas:(id)parmas andComplition:(void (^)(id response,BOOL isuccess))complition{
+    urlstr=[NSString stringWithFormat:@"%@%@",urlstr,server];
+    MBProgressHUD *hud=[MBProgressHUD showProgress:@"loading..."];
+    void (^success)(NSURLSessionDataTask *task, id _Nullable responseObject)=^(NSURLSessionDataTask *task, id _Nullable responseObject){
+        [hud hideAnimated:YES];
+        complition(responseObject,YES);
+    };
+    void (^failure)(NSURLSessionDataTask * _Nullable task, NSError *error)=^(NSURLSessionDataTask * _Nullable task, NSError *error){
+        [hud hideAnimated:YES];
+        complition(nil,false);
+    };
+    if (type==GET) {
+        [self GET:urlstr parameters:parmas progress:nil success:success failure:failure];
+    }
+    else
+        [self POST:urlstr parameters:parmas progress:nil success:success failure:failure];
+    
+}
+
+@end

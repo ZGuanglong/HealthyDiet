@@ -1,0 +1,20 @@
+//
+//  DLUserInfo.h
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/10.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "DLUser.h"
+#import "DLUserDetail.h"
+#import "DLStoreListInfo.h"
+@interface DLUserInfo : NSObject
+
++(void)SaveUserInfoFromDic:(NSDictionary *)dic;
++(DLUser *)getUser;
++(DLUserDetail *)getUserDetail;
++(void)SaveStoreInfo:(DLStoreListInfo *)storeinfo;
++(DLStoreListInfo*)getUserStore;
+@end

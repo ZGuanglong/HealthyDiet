@@ -1,0 +1,17 @@
+//
+//  DLEatingCalendarViewController.h
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/31.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface DLEatingCalendarViewController : UIViewController
+
+@property(strong,nonatomic)NSArray *CanselectArray;
+
+@property (nonatomic, strong) NSDate *currentdate;
+@property(copy,nonatomic)void (^selectDate)(NSDate *date);
+@end

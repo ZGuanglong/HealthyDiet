@@ -1,0 +1,45 @@
+//
+//  DL.h
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/4/1.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "DLStorefoodsDetailInfo.h"
+@interface DLStorefoodsInfo : NSObject
+
+@property(assign,nonatomic)NSInteger weight;
+
+@property(copy,nonatomic)NSString *dishesName;
+
+@property(strong,nonatomic)DLStorefoodsDetailInfo *ingredients;
+
+@property(strong,nonatomic)DLStorefoodsDetailInfo *oil;
+
+@property(strong,nonatomic)NSArray<DLStorefoodsDetailInfo *> *accessoriesList;
+
+@property(strong,nonatomic)NSArray<DLStorefoodsDetailInfo *> *seasoningList;
+@property(copy,nonatomic)NSString *imagesURL1;
+
+@property(copy,nonatomic)NSString *imagesURL;
+
+@property(assign,nonatomic)NSInteger num;
+
+@property(assign,nonatomic)NSInteger dishesCode;
+
+@property(assign,nonatomic)NSInteger proWeight;
+
+/**
+ 自己增加的字段
+ */
+@property(assign,nonatomic)NSInteger selectNum;
+
+@property(assign,nonatomic)NSInteger wayType;
+
+@property(assign,nonatomic)NSInteger customWeight;
+
+
+
+@end

@@ -1,0 +1,365 @@
+//
+//  DLMineDataViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/15.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLMineDataViewController.h"
+#import "DLRightImageButton.h"
+#import "DLMineBaseViewController.h"
+#import "DLSexChioceViewController.h"
+#import "DLBrithdayChioceViewController.h"
+#import "DLWorkChioceViewController.h"
+#import "DLWeightChioceViewController.h"
+#import "DLHeightChioceViewController.h"
+#import "DLTabooChioceViewController.h"
+#import "DLAllergyChioceViewController.h"
+#import "DLNativePlaceChioceViewController.h"
+#import "DLSpecialWomanViewController.h"
+#import "DLLiveChioceViewController.h"
+#import "DLPhysiologyChioceViewController.h"
+#import "DLFlavorViewController.h"
+#import "DLHealthHistoryViewController.h"
+#import "DLOtherDemandViewController.h"
+@interface DLMineDataViewController ()
+
+@property(weak,nonatomic)UIImageView *headImageView;
+
+/**
+ 固定图片标题
+ */
+@property(strong,nonatomic)NSArray *baseHeadArray;
+
+@property(strong,nonatomic)NSArray *baseVCArray;
+
+@property(strong,nonatomic)NSMutableArray *basedetailArray;
+
+@property(strong,nonatomic)NSMutableArray *ChangeableArray;
+
+@end
+
+@implementation DLMineDataViewController
+
+- (NSMutableArray *)basedetailArray
+{
+    if (!_basedetailArray) {
+        _basedetailArray=[NSMutableArray arrayWithArray:@[
+            [DLUserInfo getUser].sex,
+            [DLUserInfo getUser].birthday,
+            [DLUserInfo getUserDetail].jobName,
+            [DLUserInfo getUser].height,
+            [DLUserInfo getUserDetail].weight,
+            [DLUserInfo getUserDetail].tabooNames,
+            [DLUserInfo getUserDetail].allergyName,
+            [DLUserInfo getUser].homeProvinceName,
+            [DLUserInfo getUserDetail].currentProvinceName,
+            [DLUserInfo getUserDetail].tasteNames,
+            [DLUserInfo getUserDetail].chronicDiseaseNames
+        ]];
+    }
+    return _basedetailArray;
+}
+- (NSMutableArray *)ChangeableArray
+{
+    if (!_ChangeableArray) {
+        _ChangeableArray=[NSMutableArray array];
+    }
+    return _ChangeableArray;
+}
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.navigationController.navigationBarHidden=NO;
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.baseHeadArray=@[@"mine_sex",@"性别",
+                         @"mine_birthday",@"生日",
+                         @"mine_work",@"职业",
+                         @"mine_height",@"身高",
+                         @"mine_weight",@"体重",
+                         @"mine_jinji",@"饮食禁忌",
+                         @"mine_guoming",@"过敏食材",
+                         @"mine_where",@"籍贯",
+                         @"mine_live",@"常住地",
+                         @"mine_tabooi",@"口味",
+                         @"mine_history",@"健康史"];
+    self.baseVCArray=@[@"DLSexChioceViewController",
+                       @"DLBrithdayChioceViewController",
+                       @"DLWorkChioceViewController",
+                       @"DLHeightChioceViewController",
+                       @"DLWeightChioceViewController",
+                       @"DLTabooChioceViewController",
+                       @"DLAllergyChioceViewController",
+                       @"DLNativePlaceChioceViewController",
+                       @"DLLiveChioceViewController",
+                       @"DLFlavorViewController",
+                       @"DLHealthHistoryViewController"];
+    self.title=@"我的资料";
+    [self changeSex];
+    [self creatHeadView];
+}
+- (void)changeSex{
+    if ([DLUserInfo getUser].sex.integerValue!=1) {
+        [self changeState];
+    }
+}
+- (void)changeState{
+    [self.ChangeableArray removeAllObjects];
+    [self.ChangeableArray addObjectsFromArray:@[[NSMutableArray arrayWithArray:@[@"mine_special",@"特殊人群",[DLUserInfo getUserDetail].specialCrowdName,@"DLSpecialWomanViewController"]]]];
+    if (strIsEmpty([DLUserInfo getUserDetail].specialCrowdName)) {
+        [self.ChangeableArray addObjectsFromArray:@[[NSMutableArray arrayWithArray:@[@"mine_slq",@"生理期",[NSString stringWithFormat:@"%@至%@",[DLUserInfo getUserDetail].periodStartTime,[DLUserInfo getUserDetail].periodEndTime],@"DLPhysiologyChioceViewController"]]]];
+    }
+//    if (strIsEmpty([DLUserInfo getUserDetail].specialCrowdName)&&strIsEmpty([DLUserInfo getUserDetail].periodStartTime)) {
+//        [self.ChangeableArray addObjectsFromArray:@[[NSMutableArray arrayWithArray:@[@"mine_special",@"特殊人群",[DLUserInfo getUserDetail].specialCrowdName,@"DLSpecialWomanViewController"]]
+//                                                    ,
+//                                                    [NSMutableArray arrayWithArray:@[@"mine_slq",@"生理期",@"",@"DLPhysiologyChioceViewController"]]
+//                                                    ]];
+//    }
+//    else if(!strIsEmpty([DLUserInfo getUserDetail].specialCrowdName)){
+//        [self.ChangeableArray addObjectsFromArray:@[[NSMutableArray arrayWithArray:@[@"mine_special",@"特殊人群",[DLUserInfo getUserDetail].specialCrowdName,@"DLSpecialWomanViewController"]]]];
+//    }
+//    else
+//    {
+//        
+//        [self.ChangeableArray addObjectsFromArray:@[[NSMutableArray arrayWithArray:@[@"mine_slq",@"生理期",[NSString stringWithFormat:@"%@至%@",[DLUserInfo getUserDetail].periodStartTime,[DLUserInfo getUserDetail].periodEndTime],@"DLPhysiologyChioceViewController"]]]];
+//    }
+
+}
+- (void)creatHeadView{
+    UIView *headView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, kScreenW, 120)];
+    headView.backgroundColor=[UIColor whiteColor];
+    self.tableView.tableHeaderView=headView;
+    
+    UIView *lineView=[[UIView alloc]init];
+    [headView addSubview:lineView];
+    lineView.backgroundColor=shouldgraycolor;
+    [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        (void)make.left;
+        (void)make.bottom;
+        (void)make.right;
+        make.height.mas_equalTo(@10);
+    }];
+    
+    UIImageView *iconimageView=[[UIImageView alloc]init];
+    iconimageView.layer.cornerRadius=40;
+    iconimageView.layer.masksToBounds=YES;
+    [iconimageView sd_setImageWithURL:[NSURL URLWithString:[DLUserInfo getUserDetail].headPhotoAdd] placeholderImage:[UIImage imageNamed:@"defaultHead"]];
+    [headView addSubview:iconimageView];
+    self.headImageView=iconimageView;
+    [iconimageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(@20);
+        make.top.mas_equalTo(@15);
+        make.bottom.mas_equalTo(lineView.mas_top).mas_offset(-15);
+        make.width.mas_equalTo(iconimageView.mas_height);
+    }];
+    
+    UILabel *phoneLabel=[[UILabel alloc]init];
+    [headView addSubview:phoneLabel];
+    phoneLabel.numberOfLines=0;
+    phoneLabel.text=[NSString stringWithFormat:@"手机号:\n%@",[DLUserInfo getUser].mobileNum];
+    [phoneLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.mas_equalTo(iconimageView.mas_centerY);
+        make.left.mas_equalTo(iconimageView.mas_right).mas_offset(20);
+    }];
+    DLRightImageButton *button=[DLRightImageButton buttonWithType:UIButtonTypeCustom];
+    button.titleLabel.font=font14;
+    [button addTarget:self action:@selector(ChoiceImage) forControlEvents:UIControlEventTouchUpInside];
+    [button setTitle:@"更换头像" forState:UIControlStateNormal];
+    [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [button setImage:[UIImage imageNamed:@"moreIndex"] forState:UIControlStateNormal];
+    [headView addSubview:button];
+    [button mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.mas_equalTo(@(-20));
+        make.size.mas_equalTo(CGSizeMake(100, 20));
+        make.centerY.mas_equalTo(iconimageView.mas_centerY);
+    }];
+}
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    if ([DLUserInfo getUser].sex.integerValue!=1){
+        return 3;
+    }
+    return 2;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    if (!section) {
+        return self.baseHeadArray.count/2.0;
+    }
+    else if (section==[self numberOfSectionsInTableView:tableView]-1)
+        return 1;
+    return self.ChangeableArray.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (!indexPath.section) {
+        static NSString *cellID=@"cell0";
+        UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:cellID];
+        if (!cell) {
+            cell=[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID];
+            cell.selectionStyle=UITableViewCellSelectionStyleNone;
+            UIView *lineview=[[UIView alloc]initWithFrame:CGRectMake(10, [self tableView:tableView heightForRowAtIndexPath:indexPath]-0.5, kScreenW-20, 0.5)];
+            lineview.backgroundColor=shouldgraycolor;
+            [cell.contentView addSubview:lineview];
+        }
+        cell.imageView.image=[UIImage imageNamed:self.baseHeadArray[indexPath.row*2]];
+        cell.textLabel.text=self.baseHeadArray[indexPath.row*2+1];
+        NSString *str=self.basedetailArray[indexPath.row];
+        if (!strIsEmpty(str)) {
+            switch (indexPath.row) {
+                case 0:
+//                    str=@"男";
+                    str=[Globel apperaSex:str];
+                    break;
+                case 3:
+                    str=[str stringByAppendingString:@"cm"];
+                    break;
+                case 4:
+                    str=[str stringByAppendingString:@"kg"];
+                    break;
+                case 5: case 6: case 9: case 10:
+                    {
+                        if (!strIsEmpty(str)) {
+                            str=[NSString stringWithFormat:@"已选%lu项",[str componentsSeparatedByString:@","].count];
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+        }
+        cell.detailTextLabel.text=str;
+        cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+        return cell;
+        
+    }
+    else if(indexPath.section==[self numberOfSectionsInTableView:tableView]-1)
+    {
+        static NSString *cellID=@"cell2";
+        UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:cellID];
+        if (!cell) {
+            cell=[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID];
+            cell.selectionStyle=UITableViewCellSelectionStyleNone;
+            UIView *lineview=[[UIView alloc]initWithFrame:CGRectMake(10, [self tableView:tableView heightForRowAtIndexPath:indexPath]-0.5, kScreenW-20, 0.5)];
+            lineview.backgroundColor=shouldgraycolor;
+            [cell.contentView addSubview:lineview];
+        }
+        cell.imageView.image=[UIImage imageNamed:@"mine_other"];
+        cell.textLabel.text=@"其他需求";
+//            cell.detailTextLabel.text=self.basedetailArray[indexPath.row];
+        cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+        return cell;
+    }
+    else
+    {
+        static NSString *cellID=@"cell0";
+        UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:cellID];
+        if (!cell) {
+            cell=[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID];
+            cell.selectionStyle=UITableViewCellSelectionStyleNone;
+            UIView *lineview=[[UIView alloc]initWithFrame:CGRectMake(10, [self tableView:tableView heightForRowAtIndexPath:indexPath]-0.5, kScreenW-20, 0.5)];
+            lineview.backgroundColor=shouldgraycolor;
+            [cell.contentView addSubview:lineview];
+        }
+        NSArray *array=self.ChangeableArray[indexPath.row];
+        cell.imageView.image=[UIImage imageNamed:array[0]];
+        cell.textLabel.text=array[1];
+        cell.detailTextLabel.text=array[2];
+        cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+        return cell;
+    }
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    __weak typeof(self) unself=self;
+    if (!indexPath.section) {
+        DLMineBaseViewController *baseVC=[[NSClassFromString(self.baseVCArray[indexPath.row]) alloc]init];
+        baseVC.title=@"基本信息";
+        baseVC.type=OtherType;
+        baseVC.selectFinish=^(NSString *value){
+            [unself.basedetailArray replaceObjectAtIndex:indexPath.row withObject:value];
+            [unself.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
+        };
+        [self.navigationController pushViewController:baseVC animated:YES];
+    }
+    else if (indexPath.section==[self numberOfSectionsInTableView:tableView]-1){
+    }
+    else{
+        DLMineBaseViewController *baseVC=[[NSClassFromString(self.ChangeableArray[indexPath.row][3]) alloc]init];
+        baseVC.type=OtherType;
+        baseVC.selectFinish=^(NSString *value){
+            [unself.ChangeableArray[indexPath.row] replaceObjectAtIndex:2 withObject:value];
+            if (indexPath.row==0) {
+                [unself changeState];
+            }
+            [unself.tableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationRight];
+        };
+        [self.navigationController pushViewController:baseVC animated:YES];
+    }
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 55;
+}
+
+- (void)ChoiceImage
+{
+    TZImagePickerController *PickerVC=[[TZImagePickerController alloc]initWithMaxImagesCount:1 delegate:nil];
+    __weak typeof(self) unself=self;
+    PickerVC.didFinishPickingPhotosHandle=^(NSArray<UIImage *> *photos,NSArray *assets,BOOL isSelectOriginalPhoto){
+        unself.headImageView.image=photos[0];
+        
+        [unself loadHeadImage:photos[0]];
+        
+        
+    };
+    [self presentViewController:PickerVC animated:YES completion:nil];
+    
+}
+
+- (void)loadHeadImage:(UIImage *)image{
+    NSMutableDictionary *dic=[NSMutableDictionary dictionary];
+    [dic setObject:@"C0100" forKey:@"transCode"];
+    [dic setObject:@"upload_head_photo" forKey:@"type"];
+    
+    NSData *data = UIImageJPEGRepresentation(image, 0.5);
+    
+    
+    // 在网络开发中，上传文件时，是文件不允许被覆盖，文件重名
+    // 要解决此问题，
+    // 可以在上传时使用当前的系统事件作为文件名
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    // 设置时间格式
+    formatter.dateFormat = @"yyyyMMddHHmmss";
+    NSString *str = [formatter stringFromDate:[NSDate date]];
+    NSString *fileName = [NSString stringWithFormat:@"%@.jpg", str];
+    
+    [dic setObject:[data base64EncodedStringWithOptions:0] forKey:@"byteString"];
+    [dic setObject:fileName forKey:@"fileName"];
+    [[GLNetWorkManager shareManager]requestType:POST andURL:REQUESTURL andServers:UPLOAD_PHOTO andParmas:dic andComplition:^(id response, BOOL isuccess) {
+        if ([response[@"code"] isEqualToString:@"000000"]) {
+            NSMutableDictionary *updatedic=[NSMutableDictionary dictionary];
+            [updatedic setObject:@"C0100" forKey:@"transCode"];
+            [updatedic setObject:@"update" forKey:@"type"];
+            [updatedic setObject:[DLUserInfo getUser].userId forKey:@"userId"];
+            [updatedic setObject:response[@"suffixAddress"] forKey:@"headPhotoAdd"];
+            [[GLNetWorkManager shareManager]requestType:POST andURL:REQUESTURL andServers:GET_WORK_TYPE andParmas:updatedic andComplition:^(id response, BOOL isuccess) {
+                if (isuccess&&[response[@"code"] isEqualToString:SUCCESSCODE]) {
+                    if (self.changeIcon) {
+                        self.changeIcon();
+                    }
+                }
+                MyLog(@"%@",response);
+            }];
+            
+        }
+        MyLog(@"%@",response);
+    }];
+}
+@end

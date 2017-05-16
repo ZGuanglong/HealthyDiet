@@ -1,0 +1,21 @@
+//
+//  AppDelegate.h
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/8.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+
+@interface AppDelegate : UIResponder <UIApplicationDelegate>
+
+@property (strong, nonatomic) UIWindow *window;
+
+@property(assign,nonatomic)VersionType versionType;
+
+
+- (void)enterMainVC;
+@end
+

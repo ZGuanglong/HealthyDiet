@@ -1,0 +1,66 @@
+//
+//  DLAllergyChioceViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/15.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLAllergyChioceViewController.h"
+
+@interface DLAllergyChioceViewController ()
+@property(weak,nonatomic)UIView *headView;
+@property(weak,nonatomic)UIView *mainView;
+@property (nonatomic, weak) UITableView *leftTableView;
+@property (nonatomic, weak) UITableView *rightTableView;
+
+@end
+
+@implementation DLAllergyChioceViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.navigationItem.rightBarButtonItem=[[UIBarButtonItem alloc]initWithTitle:@"" style:UIBarButtonItemStyleDone target:self action:@selector(test)];
+    UIView *headview=[[UIView alloc]init];
+    headview.backgroundColor=[UIColor greenColor];
+    [self.view addSubview:headview];
+    self.headView=headview;
+    [headview mas_makeConstraints:^(MASConstraintMaker *make) {
+        (void)make.top;
+        (void)make.left;
+        (void)make.right;
+        make.height.mas_equalTo(@100);
+    }];
+    
+    UIView *mainview=[[UIView alloc]init];
+    mainview.backgroundColor=[UIColor redColor];
+    [self.view addSubview:mainview];
+    [mainview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(headview.mas_bottom);
+        (void)make.bottom;
+        (void)make.left;
+        (void)make.right;
+    }];
+    // Do any additional setup after loading the view.
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)test{
+    [self.headView mas_updateConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(@200);
+    }];
+    // 通知需要更新约束，但是不立即执行
+    [self.view setNeedsUpdateConstraints];
+    // 立即更新约束，以执行动态变换
+    // update constraints now so we can animate the change
+    [self.view updateConstraintsIfNeeded];
+    // 执行动画效果, 设置动画时间
+    [UIView animateWithDuration:2 animations:^{
+        [self.view layoutIfNeeded];
+    }];
+}
+@end

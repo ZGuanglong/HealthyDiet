@@ -1,0 +1,116 @@
+//
+//  DLStoreViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/9.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLStoreViewController.h"
+#import "SZKRoundScrollView.h"
+#import "DLChioceStoreListViewController.h"
+#import "DLBannarImageInfo.h"
+#import "WKWebViewController.h"
+#import "DLRightImageButton.h"
+@interface DLStoreViewController ()
+@property(weak,nonatomic)UIScrollView *mainScrollView;
+@property(weak,nonatomic)UITableView *lefttableView;
+@property(weak,nonatomic)UITableView *righttableView;
+@property(strong,nonatomic)DLStoreListInfo *StoreInfo;
+
+@property(strong,nonatomic)NSMutableArray<DLBannarImageInfo*> *imageArray;
+
+@property(weak,nonatomic)UIView *headView;
+
+@property(weak,nonatomic)SZKRoundScrollView *bannarView;
+
+@end
+
+@implementation DLStoreViewController
+
+- (NSMutableArray *)imageArray
+{
+    if (!_imageArray) {
+        _imageArray=[NSMutableArray array];
+    }
+    return _imageArray;
+}
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.navigationController.navigationBarHidden=YES;
+    //
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.StoreInfo=[DLUserInfo getUserStore];
+    [self LoadBannerData];
+    UIScrollView *mainScrollView=[[UIScrollView alloc]initWithFrame:CGRectMake(0, 0, kScreenW, kScreenH+64-49)];
+    mainScrollView.delegate=self;
+    mainScrollView.backgroundColor=[UIColor yellowColor];
+    mainScrollView.contentSize=CGSizeMake(0, kScreenH+100);
+    [self.view addSubview:mainScrollView];
+    self.mainScrollView=mainScrollView;
+    UIView *headView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, kScreenW, 200*kScreenW/375)];
+    [mainScrollView addSubview:headView];
+    self.headView=headView;
+    DLRightImageButton *button=[[DLRightImageButton alloc]initWithFrame:CGRectMake(0, 30, kScreenW-200, 36)];
+    [button setImage:[UIImage imageNamed:@"downindex"] forState:UIControlStateNormal];
+    
+    button.centerX=headView.centerX;
+    [button setTitle:self.StoreInfo.name forState:UIControlStateNormal];
+    button.backgroundColor=rgba(0, 0, 0, 0.5);
+    button.layer.cornerRadius=18;
+    button.layer.masksToBounds=YES;
+    [button addTarget:self action:@selector(chioceList:) forControlEvents:UIControlEventTouchUpInside];
+    [headView addSubview:button];
+    [headView bringSubviewToFront:button];
+    // Do any additional setup after loading the view.
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)chioceList:(UIButton *)sender{
+    DLChioceStoreListViewController *listVC=[[DLChioceStoreListViewController alloc]init];
+    listVC.type=OtherType;
+    __weak typeof(self) unself=self;
+    listVC.selectStore=^(DLStoreListInfo *storeinfo){
+        unself.StoreInfo=storeinfo;
+        [sender setTitle:storeinfo.name forState:UIControlStateNormal];
+    };
+    [self.navigationController pushViewController:listVC animated:YES];
+}
+
+
+- (void)LoadBannerData{
+    NSMutableDictionary *dic=[NSMutableDictionary dictionary];
+    dic.transCode=@"M0073";
+    dic.type=@"store";
+    [dic setObject:@"1" forKey:@"tag"];
+    [dic setObject:@2 forKey:@"status"];
+    [dic setObject:@"storeId" forKey:self.StoreInfo.storeId];
+    [dic setObject:@"1" forKey:@"rotateWay"];
+    [[GLNetWorkManager shareManager]requestType:POST andURL:REQUESTURL andServers:GETBANNER andParmas:dic andComplition:^(id response, BOOL isuccess) {
+        MyLog(@"%@",response);
+        if (isuccess&&[response[@"code"] isEqualToString:@"000000"]) {
+            [self.imageArray addObjectsFromArray:[DLBannarImageInfo mj_objectArrayWithKeyValuesArray:response[@"imageUrl"]]];
+            __weak typeof(self) unself=self;
+            SZKRoundScrollView *barnarView=[SZKRoundScrollView roundScrollViewWithFrame:self.headView.bounds imageArr:self.imageArray timerWithTimeInterval:4.0 imageClick:^(NSInteger imageIndex) {
+                WKWebViewController *webview=[[WKWebViewController alloc]init];
+                webview.urlSring=unself.imageArray[imageIndex].linkUrl;
+                [unself.navigationController pushViewController:webview animated:YES];
+            }];
+            barnarView.curPageControlColor=[UIColor orangeColor];
+            [self.headView addSubview:barnarView];
+            [self.headView sendSubviewToBack:barnarView];
+            self.bannarView=barnarView;
+        }
+    }];
+}
+
+
+@end

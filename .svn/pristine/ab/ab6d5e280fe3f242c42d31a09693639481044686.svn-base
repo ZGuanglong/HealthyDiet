@@ -1,0 +1,40 @@
+//
+//  DLMineBaseViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/15.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLMineBaseViewController.h"
+
+@interface DLMineBaseViewController ()
+
+@end
+
+@implementation DLMineBaseViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.view.backgroundColor=[UIColor whiteColor];
+    // Do any additional setup after loading the view.
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)updateInfofromKey:(NSString *)key andValue:(NSString *)value
+{
+    NSMutableDictionary *updatedic=[NSMutableDictionary dictionary];
+    [updatedic setObject:@"C0100" forKey:@"transCode"];
+    [updatedic setObject:@"update" forKey:@"type"];
+    [updatedic setObject:[DLUserInfo getUser].userId forKey:@"userId"];
+    [updatedic setObject:value forKey:key];
+    [[GLNetWorkManager shareManager]requestType:POST andURL:REQUESTURL andServers:GET_WORK_TYPE andParmas:updatedic andComplition:^(id response, BOOL isuccess) {
+        
+    }];
+
+}
+@end

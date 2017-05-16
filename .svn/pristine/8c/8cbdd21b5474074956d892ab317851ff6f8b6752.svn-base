@@ -1,0 +1,123 @@
+//
+//  DLSexChioceViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/15.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLSexChioceViewController.h"
+#import "DLBottomTitleButton.h"
+@interface DLSexChioceViewController ()
+@property(weak,nonatomic)DLBottomTitleButton *selectbutton;
+@end
+
+@implementation DLSexChioceViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.view.backgroundColor=BackGroundColor;
+//    self.title=@"性别";
+    UILabel *label=[[UILabel alloc]init];
+    label.text=@"您的性别?";
+    [self.view addSubview:label];
+    [label mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(20);
+        (void)make.centerX;
+    }];
+    UIImageView *leftimageView=[[UIImageView alloc]init];
+    leftimageView.contentMode=UIViewContentModeScaleAspectFit;
+    leftimageView.image=[UIImage imageNamed:@"left_line"];
+    [self.view addSubview:leftimageView];
+    [leftimageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.mas_equalTo(label.mas_centerY);
+        make.right.mas_equalTo(label.mas_left).mas_offset(-10);
+        make.size.mas_equalTo(CGSizeMake(100, 20));
+    }];
+    
+    UIImageView *rightimageView=[[UIImageView alloc]init];
+    rightimageView.contentMode=UIViewContentModeScaleAspectFit;
+    rightimageView.image=[UIImage imageNamed:@"right_line"];
+    [self.view addSubview:rightimageView];
+    [rightimageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.mas_equalTo(label.mas_centerY);
+        make.left.mas_equalTo(label.mas_right).mas_offset(10);
+        make.size.mas_equalTo(CGSizeMake(100, 20));
+    }];
+
+    UIView *bgView=[[UIView alloc]init];
+    bgView.backgroundColor=[UIColor whiteColor];
+    [self.view addSubview:bgView];
+    [bgView mas_makeConstraints:^(MASConstraintMaker *make) {
+        (void)make.left;
+        (void)make.right;
+        make.top.mas_equalTo(label.mas_bottom).mas_offset(20);
+        make.height.mas_equalTo(bgView.mas_width).multipliedBy(0.6);
+    }];
+    UIView *lineview=[[UIView alloc]init];
+    lineview.backgroundColor=shouldgraycolor;
+    [bgView addSubview:lineview];
+    
+    [lineview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(20);
+        make.bottom.mas_equalTo(@(-20));
+        make.centerX.mas_equalTo(@(bgView.width/2));
+        make.width.mas_equalTo(@1);
+    }];
+    
+    DLBottomTitleButton *boyButton=[[DLBottomTitleButton alloc]init];
+    [boyButton setImage:[UIImage imageNamed:@"sex_boy_unselect"] forState:UIControlStateNormal];
+    [boyButton setImage:[UIImage imageNamed:@"sex_boy_select"] forState:UIControlStateSelected];
+    [boyButton setTitle:@"男" forState:UIControlStateNormal];
+    [boyButton setTitle:@"男" forState:UIControlStateSelected];
+    [bgView addSubview:boyButton];
+    boyButton.tag=1000;
+    [boyButton addTarget:self action:@selector(selectSex:) forControlEvents:UIControlEventTouchUpInside];
+    [boyButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(@20);
+        make.right.mas_equalTo(lineview.mas_left).mas_offset(-20);
+        make.bottom.mas_equalTo(@(-20));
+        make.width.mas_equalTo(boyButton.mas_height).multipliedBy(0.6);
+    }];
+    
+    DLBottomTitleButton *girlButton=[[DLBottomTitleButton alloc ]init];
+    [girlButton setImage:[UIImage imageNamed:@"sex_gril_unselect"] forState:UIControlStateNormal];
+    [girlButton setImage:[UIImage imageNamed:@"sex_girl_select"] forState:UIControlStateSelected];
+    [girlButton setTitle:@"女" forState:UIControlStateNormal];
+    [girlButton setTitle:@"女" forState:UIControlStateSelected];
+    [bgView addSubview:girlButton];
+    boyButton.tag=1001;
+    [girlButton addTarget:self action:@selector(selectSex:) forControlEvents:UIControlEventTouchUpInside];
+    [girlButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(@20);
+        make.left.mas_equalTo(lineview.mas_right).mas_offset(20);
+        make.bottom.mas_equalTo(@(-20));
+        make.width.mas_equalTo(girlButton.mas_height).multipliedBy(0.6);
+    }];
+    
+    UIButton *doneButton=[[UIButton alloc]init];
+    doneButton.backgroundColor=THEMECOLOR;
+    if (self.type==FirstType) {
+        [doneButton setTitle:@"下一步" forState:UIControlStateNormal];
+    }
+    else
+        [doneButton setTitle:@"确定" forState:UIControlStateNormal];
+    [self.view addSubview:doneButton];
+    doneButton.layer.masksToBounds=YES;
+    doneButton.layer.cornerRadius=22;
+    [doneButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(@50);
+        make.top.mas_equalTo(bgView.mas_bottom).mas_offset(40);
+        make.right.mas_equalTo(@(-50));
+        make.height.mas_equalTo(@44);
+    }];
+    
+    // Do any additional setup after loading the view.
+}
+
+- (void)selectSex:(DLBottomTitleButton *)sender{
+    self.selectbutton.selected=NO;
+    sender.selected=YES;
+    self.selectbutton=sender;
+}
+@end

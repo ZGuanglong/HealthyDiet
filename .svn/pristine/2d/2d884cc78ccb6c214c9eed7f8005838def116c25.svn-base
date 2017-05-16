@@ -1,0 +1,104 @@
+//
+//  DLHomeViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/9.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLHomeViewController.h"
+#import "SZKRoundScrollView.h"
+#import "DLChioceStoreListViewController.h"
+@interface DLHomeViewController ()
+@property(weak,nonatomic)UIScrollView *mainScrollView;
+@property(weak,nonatomic)UITableView *lefttableView;
+@property(weak,nonatomic)UITableView *righttableView;
+@end
+
+@implementation DLHomeViewController
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.navigationController.navigationBarHidden=YES;
+//
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    UIScrollView *mainScrollView=[[UIScrollView alloc]initWithFrame:CGRectMake(0, -20, kScreenW, kScreenH+64-49)];
+    mainScrollView.delegate=self;
+    mainScrollView.backgroundColor=[UIColor yellowColor];
+    mainScrollView.contentSize=CGSizeMake(0, kScreenH+100);
+    [self.view addSubview:mainScrollView];
+    self.mainScrollView=mainScrollView;
+    UIView *headView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, kScreenW, 100)];
+    headView.backgroundColor=[UIColor redColor];
+    [mainScrollView addSubview:headView];
+    
+    UIButton *button=[[UIButton alloc]initWithFrame:CGRectMake(100, 20, 100, 30)];
+    [button setTitle:@"选择门店" forState:UIControlStateNormal];
+    [button addTarget:self action:@selector(chioceList:) forControlEvents:UIControlEventTouchUpInside];
+    [headView addSubview:button];
+    UITableView *leftview=[[UITableView alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(headView.frame), 80, kScreenH)];
+    leftview.delegate=self;
+    leftview.dataSource=self;
+    [mainScrollView addSubview:leftview];
+    self.lefttableView=leftview;
+    
+    
+    UITableView *rightview=[[UITableView alloc]initWithFrame:CGRectMake(80, CGRectGetMaxY(headView.frame), kScreenW-80, kScreenH)];
+    rightview.delegate=self;
+    rightview.dataSource=self;
+    [mainScrollView addSubview:rightview];
+    self.righttableView=rightview;
+
+
+}
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    if (tableView==self.lefttableView) {
+        return 1;
+    }
+    else
+        return 10;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    if (tableView==self.lefttableView) {
+        return 10;
+    }
+    else
+        return 5;
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *cellID=@"cell1";
+    UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:cellID];
+    if (!cell) {
+        cell=[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
+        cell.selectionStyle=UITableViewCellSelectionStyleNone;
+    }
+    if (tableView==self.lefttableView) {
+        cell.textLabel.text=[NSString stringWithFormat:@"%@--%lu",@"left",indexPath.section];
+    }
+    else
+        cell.textLabel.text=[NSString stringWithFormat:@"%@--%lu--%lu",@"right",indexPath.section,indexPath.row];
+    return cell;
+
+}
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    if (scrollView==self.righttableView) {
+        CGFloat offset=scrollView.contentOffset.y;
+        if (offset<100) {
+            self.mainScrollView.contentOffset=scrollView.contentOffset;
+ 
+        }
+    }
+}
+- (void)chioceList:(UIButton *)sender{
+    DLChioceStoreListViewController *listVC=[[DLChioceStoreListViewController alloc]init];
+    [self.navigationController pushViewController:listVC animated:YES];
+}
+@end

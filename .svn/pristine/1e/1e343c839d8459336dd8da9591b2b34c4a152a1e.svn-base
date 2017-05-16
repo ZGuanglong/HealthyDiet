@@ -1,0 +1,14 @@
+platform :ios, '8.0'
+
+target 'DiLiRestaurant' do
+pod 'AFNetworking'
+pod 'SDWebImage'
+pod 'MJRefresh'
+pod 'MBProgressHUD'
+pod 'TZImagePickerController'
+pod 'MJExtension'
+pod 'SAMKeychain'
+pod 'FMDB'
+pod 'TPKeyboardAvoiding'
+pod 'WebViewJavascriptBridge'
+end

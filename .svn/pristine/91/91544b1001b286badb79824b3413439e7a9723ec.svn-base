@@ -1,0 +1,182 @@
+//
+//  DLSearchFoodsViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/4/7.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLSearchFoodsViewController.h"
+#import "DLStoreFoodsTableViewCell.h"
+@interface DLSearchFoodsViewController ()<UITableViewDelegate,UITableViewDataSource,UISearchControllerDelegate,UISearchResultsUpdating,UISearchBarDelegate>
+
+@property(weak,nonatomic)UITableView *tableView;
+@property(nonatomic,strong) UISearchController * searchController;
+
+@property(nonatomic,strong) NSMutableArray * searchArray;
+
+@property(strong,nonatomic)NSMutableArray *dataArray;
+
+@property(assign,nonatomic)NSInteger pageIndex;
+
+@property(assign,nonatomic)BOOL IsmoreData;
+
+@property(copy,nonatomic)NSString *searchText;
+@end
+
+@implementation DLSearchFoodsViewController
+
+- (NSMutableArray *)dataArray
+{
+    if (!_dataArray) {
+        _dataArray=[NSMutableArray array];
+    }
+    return _dataArray;
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    self.searchController.active=NO;
+}
+
+- (NSMutableArray *)searchArray
+{
+    if (!_searchArray) {
+        _searchArray=[NSMutableArray array];
+    }
+    return _searchArray;
+}
+
+- (UISearchController *)searchController
+{
+    if (!_searchController) {
+        _searchController=[[UISearchController alloc]initWithSearchResultsController:nil];
+        _searchController.delegate=self;
+        
+        _searchController.searchResultsUpdater=self;
+        _searchController.searchBar.delegate=self;
+        _searchController.dimsBackgroundDuringPresentation=NO;
+        _searchController.hidesNavigationBarDuringPresentation=NO;
+    }
+    return _searchController;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.searchText=@"";
+    self.view.backgroundColor=BackGroundColor;
+    self.pageIndex=1;
+
+    self.title=self.eatType==StoreType?@"门店菜单搜索":@"自定义菜单搜索";
+    self.navigationItem.leftBarButtonItem = [UIBarButtonItem itemWithTargat:self action:@selector(back) image:@"navigationbar_back" highImage:@"navigationbar_back_highlighted"];
+    UITableView *tableview=[[UITableView alloc]initWithFrame:ViewRect style:UITableViewStylePlain];
+//    tableview.separatorStyle=UITableViewCellSeparatorStyleNone;
+    tableview.delegate=self;
+    tableview.dataSource=self;
+    [self.view addSubview:tableview];
+    self.tableView=tableview;
+    __weak typeof(self) unself=self;
+    tableview.mj_footer=[MJRefreshBackFooter footerWithRefreshingBlock:^{
+        if (unself.IsmoreData) {
+            unself.pageIndex++;
+            [unself getDataFromName:self.searchText];
+        }
+        else
+        {
+            [MBProgressHUD showMessage:@"没有更多的数据了"];
+            [unself.tableView.mj_footer endRefreshing];
+        }
+    }];
+    self.tableView.tableHeaderView=self.searchController.searchBar;
+    [self.tableView registerNib:[UINib nibWithNibName:NSStringFromClass([DLStoreFoodsTableViewCell class]) bundle:nil] forCellReuseIdentifier:@"foods"];
+}
+- (void)queryHistoryList{
+    //1.获得数据库文件的路径
+    NSString *doc =[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES)  lastObject];
+    
+    NSString *fileName = [doc stringByAppendingPathComponent:@"customfoods.sqlite"];
+    
+    //2.获得数据库
+    FMDatabase *db = [FMDatabase databaseWithPath:fileName];
+    
+    //3.使用如下语句，如果打开失败，可能是权限不足或者资源不足。通常打开完操作操作后，需要调用 close 方法来关闭数据库。在和数据库交互 之前，数据库必须是打开的。如果资源或权限不足无法打开或创建数据库，都会导致打开失败。
+    if ([db open])
+    {
+        //4.创表
+        BOOL result = [db executeUpdate:@"CREATE TABLE IF NOT EXISTS customfood (dishesCode integer PRIMARY KEY AUTOINCREM ENT, imagesURL text NOT NULL, age integer NOT NULL,dishesNametext NOT NULL,weight integer);"];
+        if (result)
+        {
+            NSLog(@"创建表成功");
+        }
+    }
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.searchController.isActive?self.searchArray.count:self.dataArray.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (self.searchController.isActive) {
+        DLStoreFoodsTableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:@"foods" forIndexPath:indexPath];
+        DLStorefoodsInfo *info=self.searchArray[indexPath.row];
+        cell.eatType=CustomType;
+        cell.foodsInfo=info;
+        //        __weak typeof(self) unself=self;
+        return cell;
+
+    }
+    static NSString *cellID=@"cell1";
+    UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:cellID];
+    if (!cell) {
+        cell=[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
+        cell.selectionStyle=UITableViewCellSelectionStyleNone;
+    }
+    return cell;
+
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 100;
+}
+
+- (void)updateSearchResultsForSearchController:(UISearchController *)searchController{
+    
+}
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
+{
+    self.pageIndex=1;
+    [self.searchArray removeAllObjects];
+    [self getDataFromName:searchBar.text];
+}
+
+- (void)getDataFromName:(NSString *)name{
+    self.searchText=name;
+    NSMutableDictionary *dic=[NSMutableDictionary dictionary];
+    dic.transCode=@"M0021";
+    dic.type=@"findAll";
+    [dic setObject:@1 forKey:@"status"];
+#warning 为了测试写个死数据  城市code
+    [dic setObject:@"230100" forKey:@"sortCode"];
+    [dic setObject:name forKey:@"dishesName"];
+    dic.currentPage=@(self.pageIndex);
+    dic.pageSize=@(PAGESIZE);
+    [[GLNetWorkManager shareManager]requestType:POST andURL:REQUESTURL andServers:GET_WORK_TYPE andParmas:dic andComplition:^(id response, BOOL isuccess) {
+        [self.tableView.mj_footer endRefreshing];
+        if (isuccess&&[response[@"code"] isEqualToString:SUCCESSCODE]) {
+            [self.searchArray addObjectsFromArray:[DLStorefoodsInfo mj_objectArrayWithKeyValuesArray:response[@"dishesLibList"]]];
+            [self.tableView reloadData];
+            self.IsmoreData=[response[@"totalCount"] integerValue]>PAGESIZE*self.pageIndex;
+        }
+        
+    }];
+ 
+}
+
+-(void)back{
+    self.searchController.active=NO;
+    [self.navigationController popViewControllerAnimated:YES];
+}
+@end

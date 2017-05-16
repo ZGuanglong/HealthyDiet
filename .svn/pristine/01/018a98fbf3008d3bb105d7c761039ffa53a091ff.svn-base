@@ -1,0 +1,39 @@
+//
+//  DLStoreViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/9.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLStoreViewController.h"
+
+@interface DLStoreViewController ()
+@property(weak,nonatomic)UIScrollView *mainScrollView;
+@property(weak,nonatomic)UITableView *lefttableView;
+@property(weak,nonatomic)UITableView *righttableView;
+@end
+
+@implementation DLStoreViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

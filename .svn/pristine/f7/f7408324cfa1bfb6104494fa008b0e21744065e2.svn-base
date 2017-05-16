@@ -1,0 +1,73 @@
+//
+//  DLUserDetail.h
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/10.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface DLUserDetail : NSObject
+@property(copy,nonatomic)NSString *currentCityName;
+
+@property(copy,nonatomic)NSString *headPhotoAdd;
+
+@property(copy,nonatomic)NSString *currentCityCode;
+
+@property(copy,nonatomic)NSString *jobTypeName;
+
+@property(copy,nonatomic)NSString *weight;
+
+@property(copy,nonatomic)NSString *tabooNames;
+
+@property(copy,nonatomic)NSString *storeName;
+
+@property(copy,nonatomic)NSString *carbohydrates;
+
+@property(copy,nonatomic)NSString *currentAdd;
+
+@property(copy,nonatomic)NSString *fat;
+
+@property(copy,nonatomic)NSString *jobName;
+
+@property(copy,nonatomic)NSString *currentDistrictId;
+
+@property(copy,nonatomic)NSString *currentProvinceCode;
+
+@property(copy,nonatomic)NSString *job;
+
+@property(copy,nonatomic)NSString *chronicDiseaseNames;
+
+@property(copy,nonatomic)NSString *currentDistrictName;
+
+@property(copy,nonatomic)NSString *ID;
+
+@property(copy,nonatomic)NSString *specialCrowdName;
+
+@property(copy,nonatomic)NSString *storeId;
+
+@property(copy,nonatomic)NSString *protein;
+
+@property(copy,nonatomic)NSString *currentProvinceName;
+
+@property(copy,nonatomic)NSString *tasteNames;
+
+@property(copy,nonatomic)NSString *targetWeight;
+
+@property(copy,nonatomic)NSString *otherReqName;
+
+@property(copy,nonatomic)NSString *energyKC;
+
+@property(copy,nonatomic)NSString *jobType;
+
+@property(copy,nonatomic)NSString *userId;
+
+@property(copy,nonatomic)NSString *allergyName;
+
+@property(copy,nonatomic)NSString *periodStartTime;
+
+@property(copy,nonatomic)NSString *periodEndTime;
+
+@property(copy,nonatomic)NSString *periodNum;
+@end

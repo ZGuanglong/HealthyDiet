@@ -1,0 +1,123 @@
+//
+//  DLLoginViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/9.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLLoginViewController.h"
+#import "DLBottomTitleButton.h"
+#import "DLRegisterViewController.h"
+#import "AppDelegate.h"
+@interface DLLoginViewController ()<UITextFieldDelegate>
+@property (weak, nonatomic) IBOutlet UITextField *TelephoneField;
+@property (weak, nonatomic) IBOutlet UITextField *PasswordField;
+@property (weak, nonatomic) IBOutlet UIButton *RegisterButton;
+
+@end
+
+@implementation DLLoginViewController
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.navigationController.navigationBarHidden=NO;
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.navigationItem.title=@"登录";
+    self.RegisterButton.layer.borderColor=[UIColor blackColor].CGColor;
+    // Do any additional setup after loading the view from its nib.
+}
+- (IBAction)registerClick:(UIButton *)sender {
+    [self ToRegisterFromWayType:RegisterType];
+}
+- (IBAction)forgetPassword:(id)sender {
+    [self ToRegisterFromWayType:FGPasswordType];
+}
+
+
+- (void)ToRegisterFromWayType:(WayType)type{
+    DLRegisterViewController *registerVC=[[DLRegisterViewController alloc]init];
+    registerVC.waytype=type;
+    __weak typeof(self) unself=self;
+    registerVC.registerSuccess=^(NSString *telephoneStr,NSString *passwordStr){
+        unself.TelephoneField.text=telephoneStr;
+        unself.PasswordField.text=passwordStr;
+    };
+    [self.navigationController pushViewController:registerVC animated:YES];
+
+}
+
+- (IBAction)eyeClick:(UIButton *)sender {
+    sender.selected=!sender.selected;
+    self.PasswordField.secureTextEntry=sender.isSelected;
+}
+- (IBAction)loginClick:(UIButton *)sender {
+    if (strIsEmpty(self.TelephoneField.text)) {
+        [MBProgressHUD showMessage:@"手机号不能为空"];
+        return;
+    }
+    if (![Globel valiMobile:self.TelephoneField.text]) {
+        [MBProgressHUD showMessage:@"手机号格式不正确"];
+        return;
+    }
+    if (self.PasswordField.text.length<6||self.PasswordField.text.length>26) {
+        [MBProgressHUD showMessage:@"密码格式不正确"];
+        return;
+    }
+    NSMutableDictionary *dic=[NSMutableDictionary dictionary];
+    [dic setObject:self.TelephoneField.text forKey:@"mobileNum"];
+    [dic setObject:[self.PasswordField.text md5String] forKey:@"password"];
+    [dic setObject:@"C0100" forKey:@"transCode"];
+    [dic setObject:@"app_login" forKey:@"type"];
+    [[GLNetWorkManager shareManager]requestType:POST andURL:REQUESTURL andServers:LOGIN andParmas:dic andComplition:^(id response, BOOL isuccess) {
+        MyLog(@"%@",response);
+        if (isuccess) {
+            if ([response[@"code"] isEqualToString:@"000000"]) {
+                [MBProgressHUD showMessage:@"登录成功"];
+                [DLUserInfo SaveUserInfoFromDic:response];
+                [((AppDelegate *)[UIApplication sharedApplication].delegate) enterMainVC];
+            }else
+                [MBProgressHUD showMessage:response[@"message"]];
+        }
+    }];
+
+}
+
+- (IBAction)OtherLoginClick:(DLBottomTitleButton *)sender {
+    
+    
+}
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+    [self.view endEditing:YES];
+}
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    return [textField resignFirstResponder];
+}
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
+    NSString *toBestring=textField.text;
+    NSCharacterSet *cs;
+    
+    cs = [[NSCharacterSet characterSetWithCharactersInString:kAlphaNum] invertedSet];
+    
+    NSString *filtered =[[string componentsSeparatedByCharactersInSet:cs] componentsJoinedByString:@""];
+    
+    BOOL basic = [string isEqualToString:filtered];
+    if (basic) {
+        if (toBestring.length>=26) {
+            textField.text=[toBestring substringToIndex:25];
+            [MBProgressHUD showMessage:@"密码不能超出26位"];
+            return NO;
+        }
+        else
+            return YES;
+    }
+    return basic;
+    
+}
+
+@end

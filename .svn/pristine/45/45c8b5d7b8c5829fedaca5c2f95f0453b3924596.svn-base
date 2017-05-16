@@ -1,0 +1,33 @@
+//
+//  DLStoreListTableViewCell.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/13.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLStoreListTableViewCell.h"
+
+@interface DLStoreListTableViewCell ()
+
+@property (weak, nonatomic) IBOutlet UILabel *name;
+
+@property (weak, nonatomic) IBOutlet UILabel *location;
+
+@end
+
+@implementation DLStoreListTableViewCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+}
+
+- (void)setStoreInfo:(DLStoreListInfo *)storeInfo
+{
+    _storeInfo=storeInfo;
+    self.name.text=storeInfo.name;
+    self.location.text=storeInfo.address;
+}
+
+@end

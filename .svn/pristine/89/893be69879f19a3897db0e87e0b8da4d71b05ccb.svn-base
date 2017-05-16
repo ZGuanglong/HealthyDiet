@@ -1,0 +1,17 @@
+//
+//  NSString+Chinese.h
+//  DaYoERP
+//
+//  Created by 财神软件 on 16/11/2.
+//  Copyright © 2016年 财神软件. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface NSString (Chinese)
+
+- (BOOL)isChinese;//判断是否是纯汉字
+
+- (BOOL)includeChinese;//判断是否含有汉字
++ (NSString *)lr_stringDate;
+@end

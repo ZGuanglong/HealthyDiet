@@ -1,0 +1,85 @@
+//
+//  DLChioceStoreListViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/13.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLChioceStoreListViewController.h"
+#import "DLStoreListTableViewCell.h"
+
+@interface DLChioceStoreListViewController ()
+@property(assign,nonatomic)NSInteger pageIndex;
+@property(assign,nonatomic)NSInteger totalCount;
+
+@end
+
+@implementation DLChioceStoreListViewController
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.navigationController.navigationBarHidden=NO;
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self.tableView setValue:@(UITableViewStyleGrouped) forKey:@"style"];
+    self.pageIndex=1;
+    [self.tableView registerNib:[UINib nibWithNibName:NSStringFromClass([DLStoreListTableViewCell class]) bundle:nil] forCellReuseIdentifier:@"StoreList"];
+    __weak typeof(self) unself=self;
+    self.tableView.mj_header=[MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        if (unself.totalCount<unself.pageIndex*PAGESIZE) {
+            [unself.tableView.mj_footer endRefreshingWithNoMoreData];
+        }
+        else
+            [unself loadDataList];
+    }];
+    [self loadDataList];
+}
+
+- (void)loadDataList{
+    NSMutableDictionary *dic=[NSMutableDictionary dictionary];
+    dic.transCode=@"C0101";
+    dic.type=@"findAll";
+    dic.pageSize=@PAGESIZE;
+    dic.currentPage=@(self.pageIndex);
+    [[GLNetWorkManager shareManager]requestType:POST andURL:REQUESTURL andServers:GET_HOMELIST andParmas:dic andComplition:^(id response, BOOL isuccess) {
+        [self.tableView.mj_footer endRefreshing];
+        if (isuccess&&[response[@"code"] isEqualToString:@"000000"]) {
+            [self.dataArray addObjectsFromArray:[DLStoreListInfo mj_objectArrayWithKeyValuesArray:response[@"storeCustList"]]];
+            self.totalCount=[response[@"totalCount"] integerValue];
+            [self.tableView reloadData];
+        }
+        MyLog(@"%@",response);
+    }];
+//    dic setObject:@"C0101" forKey:@""
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return self.dataArray.count;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 1;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    DLStoreListTableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:@"StoreList" forIndexPath:indexPath];
+    cell.storeInfo=self.dataArray[indexPath.section];
+    return cell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 70;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (self.selectStore) {
+        self.selectStore(self.dataArray[indexPath.section]);
+    }
+    [self.navigationController popViewControllerAnimated:YES];
+}
+@end

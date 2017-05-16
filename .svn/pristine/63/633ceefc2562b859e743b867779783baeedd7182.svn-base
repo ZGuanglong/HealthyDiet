@@ -1,0 +1,50 @@
+//
+//  DLHomeViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/9.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLHomeViewController.h"
+@interface DLHomeViewController ()
+@end
+
+@implementation DLHomeViewController
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.view.backgroundColor=RandomColor;
+
+}
+
+//-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    static NSString *cellID=@"cell1";
+//    UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:cellID];
+//    if (!cell) {
+//        cell=[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
+//        cell.selectionStyle=UITableViewCellSelectionStyleNone;
+//    }
+//    if (tableView==self.lefttableView) {
+//        cell.textLabel.text=[NSString stringWithFormat:@"%@--%lu",@"left",indexPath.section];
+//    }
+//    else
+//        cell.textLabel.text=[NSString stringWithFormat:@"%@--%lu--%lu",@"right",indexPath.section,indexPath.row];
+//    return cell;
+//
+//}
+//- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+//{
+//    if (scrollView==self.righttableView) {
+//        CGFloat offset=scrollView.contentOffset.y;
+//        if (offset<100) {
+//            self.mainScrollView.contentOffset=scrollView.contentOffset;
+// 
+//        }
+//    }
+//}
+//- (void)chioceList:(UIButton *)sender{
+//    DLChioceStoreListViewController *listVC=[[DLChioceStoreListViewController alloc]init];
+//    [self.navigationController pushViewController:listVC animated:YES];
+//}
+@end

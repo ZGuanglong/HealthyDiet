@@ -1,0 +1,304 @@
+//
+//  Globel.m
+//  DaYoERP
+//
+//  Created by 财神软件 on 16/10/17.
+//  Copyright © 2016年 财神软件. All rights reserved.
+//
+
+#import "Globel.h"
+
+@implementation Globel
+
+
+
+
++ (CGSize)getSizeOfString:(NSString *)string maxWidth:(float)width maxHeight:(float)height withFontSize:(CGFloat)fontSize
+{
+    CGSize titleSize = [string boundingRectWithSize:CGSizeMake(width, height) options:NSStringDrawingUsesLineFragmentOrigin| NSStringDrawingUsesFontLeading attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:fontSize]} context:nil].size;
+    
+    return titleSize;
+}
+
++(NSString *)UUID
+{
+    NSString * currentDeviceUUIDStr = [SAMKeychain passwordForService:@""account:@"uuid"];
+    if (strIsEmpty(currentDeviceUUIDStr)) {
+        NSUUID * currentDeviceUUID  = [UIDevice currentDevice].identifierForVendor;
+        currentDeviceUUIDStr = currentDeviceUUID.UUIDString;
+        currentDeviceUUIDStr = [currentDeviceUUIDStr stringByReplacingOccurrencesOfString:@"-" withString:@""];
+        currentDeviceUUIDStr = [currentDeviceUUIDStr lowercaseString];
+        [SAMKeychain setPassword:currentDeviceUUIDStr forService:@"" account:@"uuid"];
+    }
+    
+    return currentDeviceUUIDStr;
+}
+//字典转字符串
++ (NSString*)dictionaryToJson:(NSDictionary *)dic
+
+{
+    
+    NSError *parseError = nil;
+    
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dic options:NSJSONWritingPrettyPrinted error:&parseError];
+    
+    return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    
+}
+
++(UIImage *)imageFromImageStr:(NSString *)str{
+     NSData *basedata = [[NSData alloc]initWithBase64EncodedString:str options:NSDataBase64DecodingIgnoreUnknownCharacters];
+    return [UIImage imageWithData:basedata];
+}
+
++ (NSString *)timeStamp
+{
+    NSDate *datenow = [NSDate date];//现在时间,你可以输出来看下是什么格式
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    [formatter stringFromDate:datenow];
+    // 时间转时间戳的方法:
+    NSString *timeSp = [NSString stringWithFormat:@"%ld", (long)[datenow timeIntervalSince1970]];
+    return timeSp;
+}
+
++ (NSInteger)howManyDaysInThisYear:(NSInteger)year withMonth:(NSInteger)month{
+    if((month == 1) || (month == 3) || (month == 5) || (month == 7) || (month == 8) || (month == 10) || (month == 12))
+        return 31 ;
+    
+    if((month == 4) || (month == 6) || (month == 9) || (month == 11))
+        return 30;
+    
+    if((year % 4 == 1) || (year % 4 == 2) || (year % 4 == 3))
+    {
+        return 28;
+    }
+    
+    if(year % 400 == 0)
+        return 29;
+    
+    if(year % 100 == 0)
+        return 28;
+    
+    return 29;
+}
+
++ (NSMutableAttributedString*)returnAttributedstringFromstring:(NSString *)string andlocation:(NSInteger)location andLength:(NSInteger)length andAttributeStringColor:(UIColor *)color andFondSize:(NSInteger)size
+{
+    NSMutableAttributedString *resultString=[[NSMutableAttributedString alloc]initWithString:string];
+    [resultString addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:size] range:NSMakeRange(location, length)];
+    
+    [resultString addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(location, length)];
+    
+    return resultString;
+    
+}
+//判断手机号码格式是否正确
+
++ (BOOL)valiMobile:(NSString *)mobileNum
+
+{
+    
+    if (mobileNum.length != 11)
+    {
+        return NO;
+    }
+    /**
+     * 手机号码:
+     * 13[0-9], 14[5,7], 15[0, 1, 2, 3, 5, 6, 7, 8, 9], 17[6, 7, 8], 18[0-9], 170[0-9]
+     * 移动号段: 134,135,136,137,138,139,150,151,152,157,158,159,182,183,184,187,188,147,178,1705
+     * 联通号段: 130,131,132,155,156,185,186,145,176,1709
+     * 电信号段: 133,153,180,181,189,177,1700
+     */
+    NSString *MOBILE = @"^1(3[0-9]|4[57]|5[0-35-9]|8[0-9]|7[0678])\\d{8}$";
+    /**
+     * 中国移动：China Mobile
+     * 134,135,136,137,138,139,150,151,152,157,158,159,182,183,184,187,188,147,178,1705
+     */
+    NSString *CM = @"(^1(3[4-9]|4[7]|5[0-27-9]|7[8]|8[2-478])\\d{8}$)|(^1705\\d{7}$)";
+    /**
+     * 中国联通：China Unicom
+     * 130,131,132,155,156,185,186,145,176,1709
+     */
+    NSString *CU = @"(^1(3[0-2]|4[5]|5[56]|7[6]|8[56])\\d{8}$)|(^1709\\d{7}$)";
+    /**
+     * 中国电信：China Telecom
+     * 133,153,180,181,189,177,1700
+     */
+    NSString *CT = @"(^1(33|53|77|8[019])\\d{8}$)|(^1700\\d{7}$)";
+    
+    
+    NSPredicate *regextestmobile = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", MOBILE];
+    NSPredicate *regextestcm = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", CM];
+    NSPredicate *regextestcu = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", CU];
+    NSPredicate *regextestct = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", CT];
+    
+    if (([regextestmobile evaluateWithObject:mobileNum] == YES)
+        || ([regextestcm evaluateWithObject:mobileNum] == YES)
+        || ([regextestct evaluateWithObject:mobileNum] == YES)
+        || ([regextestcu evaluateWithObject:mobileNum] == YES))
+    {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
+}
+//比较两个时间的大小
++ (BOOL)compareToDate:(NSDate *)firstDate WithDate:(NSDate *)secondDate
+{
+    if ([firstDate compare:secondDate]!= NSOrderedAscending)
+    {
+        return YES;
+    }
+    return NO;
+}
++(NSMutableAttributedString*)addbottonlineWithString:(NSString *)str andstrColor:(UIColor *)color andFontsize:(NSInteger)fontsize{
+    NSMutableAttributedString *hyperLinkString = [[NSMutableAttributedString alloc] initWithString:str];
+    NSRange selectedRange = {0, [hyperLinkString length]};
+    [hyperLinkString addAttribute:NSForegroundColorAttributeName
+                            value:color // 更改颜色
+                            range:selectedRange];
+    [hyperLinkString addAttribute:NSUnderlineStyleAttributeName
+                            value:[NSNumber numberWithInteger:NSUnderlineStyleSingle]range:selectedRange]; //在属性中为字体添加下划线 NSUnderlineStyleSingle 添加下划线属性
+    [hyperLinkString addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:fontsize] range:selectedRange];  //设置指定字体的属性和大小
+    NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+    [paragraphStyle setLineSpacing:10];
+    [hyperLinkString addAttribute:NSParagraphStyleAttributeName value:paragraphStyle range:NSMakeRange(0, [str length])];
+    return hyperLinkString;
+}
++(BOOL)HasPowerFromArray:(NSDictionary *)dic and:(NSString *)str{
+    NSArray *array=[dic[@"FFunctions"] componentsSeparatedByString:@","];
+    if ([array containsObject:str]) {
+        return YES;
+    }
+    return NO;
+}
+
++(NSString *)appleIFA {
+    NSString *ifa = nil;
+    Class ASIdentifierManagerClass = NSClassFromString(@"ASIdentifierManager");
+    if (ASIdentifierManagerClass) { // a dynamic way of checking if AdSupport.framework is available
+        SEL sharedManagerSelector = NSSelectorFromString(@"sharedManager");
+        id sharedManager = ((id (*)(id, SEL))[ASIdentifierManagerClass methodForSelector:sharedManagerSelector])(ASIdentifierManagerClass, sharedManagerSelector);
+        SEL advertisingIdentifierSelector = NSSelectorFromString(@"advertisingIdentifier");
+        NSUUID *advertisingIdentifier = ((NSUUID* (*)(id, SEL))[sharedManager methodForSelector:advertisingIdentifierSelector])(sharedManager, advertisingIdentifierSelector);
+        ifa = [advertisingIdentifier UUIDString];
+    }
+    return ifa;
+}
+
++ (void)setValue:(NSString *)value forKey:(NSString *)key inService:(NSString *)service {
+    NSMutableDictionary *keychainItem = [[NSMutableDictionary alloc] init];
+    keychainItem[(__bridge id)kSecClass] = (__bridge id)kSecClassGenericPassword;
+    keychainItem[(__bridge id)kSecAttrAccessible] = (__bridge id)kSecAttrAccessibleAlways;
+    keychainItem[(__bridge id)kSecAttrAccount] = key;
+    keychainItem[(__bridge id)kSecAttrService] = service;
+    keychainItem[(__bridge id)kSecValueData] = [value dataUsingEncoding:NSUTF8StringEncoding];
+    SecItemAdd((__bridge CFDictionaryRef)keychainItem, NULL);
+}
+
++ (void)drawDashLine:(UIView *)lineView lineLength:(int)lineLength lineSpacing:(int)lineSpacing lineColor:(UIColor *)lineColor
+{
+    CAShapeLayer *shapeLayer = [CAShapeLayer layer];
+    [shapeLayer setBounds:lineView.bounds];
+    [shapeLayer setPosition:CGPointMake(CGRectGetWidth(lineView.frame) / 2, CGRectGetHeight(lineView.frame)/2.0)];
+    [shapeLayer setFillColor:[UIColor clearColor].CGColor];
+    //  设置虚线颜色为blackColor
+    [shapeLayer setStrokeColor:lineColor.CGColor];
+    //  设置虚线宽度
+    [shapeLayer setLineWidth:CGRectGetWidth(lineView.frame)];
+    [shapeLayer setLineJoin:kCALineJoinRound];
+    //  设置线宽，线间距
+    [shapeLayer setLineDashPattern:[NSArray arrayWithObjects:[NSNumber numberWithInt:lineLength], [NSNumber numberWithInt:lineSpacing], nil]];
+    //  设置路径
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathMoveToPoint(path, NULL, 0, 0);
+    CGPathAddLineToPoint(path, NULL,0, CGRectGetHeight(lineView.frame));
+    [shapeLayer setPath:path];
+    CGPathRelease(path);
+    //  把绘制好的虚线添加上来
+    [lineView.layer addSublayer:shapeLayer];
+}
++(NSString *)telephoneArrayFromString:(NSString *)telephone{
+    
+    NSArray *specialArray=@[@"/",@";",@":",@"-",@" ",@"  ",@"：",@"；",@"，",@"、",@"。",@",",@"\\",@"|"];
+    for (NSString *obj in specialArray) {
+      telephone=[telephone stringByReplacingOccurrencesOfString:obj withString:@"\n"];
+        
+    }
+    return telephone ;
+}
+
++ (NSString *)getEalyYear{
+    //得到当前的时间
+    NSDate * mydate = [NSDate date];
+    
+    NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd"];
+//    NSString *currentDateStr = [dateFormatter stringFromDate:[NSDate date]];
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    
+//    NSDateComponents *comps = nil;
+//    
+//    comps = [calendar components:NSCalendarUnitYear|NSCalendarUnitMonth|NSCalendarUnitMonth fromDate:mydate];
+    
+    NSDateComponents *adcomps = [[NSDateComponents alloc] init];
+    
+    [adcomps setYear:-1];
+    
+    [adcomps setMonth:0];
+    
+    [adcomps setDay:0];
+    NSDate *newdate = [calendar dateByAddingComponents:adcomps toDate:mydate options:0];
+    NSString *beforDate = [dateFormatter stringFromDate:newdate];
+    return beforDate;
+}
+
++(NSString *)getNowDay{
+    NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd"];
+    return [dateFormatter stringFromDate:[NSDate date]];
+}
+
++ (NSString *)apperaSex:(NSString *)sexcode
+{
+    
+    if ([sexcode isEqualToString:@"0"]) {
+        return @"女";
+    }
+    else if ([sexcode isEqualToString:@"1"])
+        return @"男";
+    else
+        return @"";
+}
++ (NSInteger)getAge:(NSString*)brithdate
+{
+    if (brithdate==nil||[brithdate isEqual:@""]) {
+        return 0;
+    }
+    NSString *nowyear=[brithdate substringToIndex:4];
+    NSDate *date=[NSDate date];
+    
+    NSCalendar *myCal = [[NSCalendar alloc]initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    
+    unsigned units  = NSCalendarUnitMonth|NSCalendarUnitDay|NSCalendarUnitYear;
+    
+    NSDateComponents *comp1 = [myCal components:units fromDate:date];
+    
+    NSInteger year = [comp1 year];
+    
+    if ((year-[nowyear integerValue])==0)
+        
+    {
+        
+        return 1;
+        
+    }
+    
+    return (long)(year-[nowyear integerValue]);
+    
+}
+
+@end

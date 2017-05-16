@@ -1,0 +1,31 @@
+//
+//  DL.h
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/4/1.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "DLStorefoodsDetailInfo.h"
+@interface DLStorefoodsInfo : NSObject
+
+@property(copy,nonatomic)NSString *dishesName;
+
+@property(strong,nonatomic)DLStorefoodsDetailInfo *ingredients;
+
+@property(strong,nonatomic)NSArray<DLStorefoodsDetailInfo *> *accessoriesList;
+
+@property(copy,nonatomic)NSString *imagesURL1;
+
+@property(copy,nonatomic)NSString *imagesURL;
+
+@property(assign,nonatomic)NSInteger num;
+
+@property(copy,nonatomic)NSString *dishesCode;
+
+@property(assign,nonatomic)NSInteger proWeight;
+
+
+
+@end

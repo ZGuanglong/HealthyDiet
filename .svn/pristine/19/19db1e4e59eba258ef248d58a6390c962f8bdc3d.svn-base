@@ -1,0 +1,27 @@
+//
+//  DLWorkHeadCollectionReusableView.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/16.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLWorkHeadCollectionReusableView.h"
+
+@interface DLWorkHeadCollectionReusableView ()
+
+@property (weak, nonatomic) IBOutlet UILabel *nameLabel;
+
+@property (weak, nonatomic) IBOutlet UILabel *detailLabel;
+
+
+@end
+
+@implementation DLWorkHeadCollectionReusableView
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+}
+
+@end

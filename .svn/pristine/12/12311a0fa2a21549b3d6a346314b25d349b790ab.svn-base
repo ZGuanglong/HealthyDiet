@@ -1,0 +1,473 @@
+//
+//  DLStoreViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/9.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLStoreViewController.h"
+#import "SZKRoundScrollView.h"
+#import "DLChioceStoreListViewController.h"
+#import "DLBannarImageInfo.h"
+#import "WKWebViewController.h"
+#import "DLRightImageButton.h"
+#import "XMFDropBoxView.h"
+#import "DLEatingCalendarViewController.h"
+#import "DLAllergyCategaryTableViewCell.h"
+#import "DLStoreFoodsTableViewCell.h"
+#import "TableViewHeaderView.h"
+#import "DLFoodDetailViewController.h"
+#import "DLServerCommitViewController.h"
+#import "DLFoodsCommitViewController.h"
+@interface DLStoreViewController ()<XMFDropBoxViewDataSource>
+{
+    NSInteger _selectIndex;
+    BOOL _isScrollDown;
+}
+
+@property(weak,nonatomic)UIScrollView *mainScrollView;
+@property(weak,nonatomic)UITableView *lefttableView;
+@property(weak,nonatomic)UITableView *righttableView;
+@property(strong,nonatomic)DLStoreListInfo *StoreInfo;
+
+@property(weak,nonatomic)UIButton *TimeButton;
+
+@property(strong,nonatomic)NSMutableArray<DLBannarImageInfo*> *imageArray;
+
+@property(weak,nonatomic)UIView *headView;
+
+@property(strong,nonatomic)NSArray *TimeArray;
+
+@property(weak,nonatomic)SZKRoundScrollView *bannarView;
+
+@property(copy,nonatomic)NSString *CurrentDate;
+
+@property(strong,nonatomic)NSDateFormatter *formatter;
+
+@property(weak,nonatomic)UIButton *appearDateButton;
+
+@property(weak,nonatomic)UIView *dateView;
+
+@property(assign,nonatomic)BOOL IsGoOver;
+
+@property(weak,nonatomic)UIView *ServiceView;
+
+@property(strong,nonatomic)NSArray *canSelectArray;
+@end
+
+@implementation DLStoreViewController
+- (NSDateFormatter*)formatter
+{
+    
+    if (_formatter == nil) {
+        
+        _formatter =[[NSDateFormatter alloc]init];
+        [_formatter setDateFormat:@"yyyy年MM月dd日"];
+    }
+    return _formatter;
+}
+
+- (NSMutableArray *)imageArray
+{
+    if (!_imageArray) {
+        _imageArray=[NSMutableArray array];
+    }
+    return _imageArray;
+}
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.navigationController.navigationBarHidden=YES;
+    //
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.StoreInfo=[DLUserInfo getUserStore];
+    self.CurrentDate=[self.formatter stringFromDate:[NSDate date]];
+    self.TimeArray=@[@"早餐",@"breakfase_icon_normal",@"午餐",@"lunch_icon_normal",@"晚餐",@"dinner_icon_normal"];
+    [self LoadBannerData];
+    UIScrollView *mainScrollView=[[UIScrollView alloc]initWithFrame:CGRectMake(0, 0, kScreenW, kScreenH-49)];
+    mainScrollView.delegate=self;
+    mainScrollView.backgroundColor=[UIColor whiteColor];
+    
+    [self.view addSubview:mainScrollView];
+    self.mainScrollView=mainScrollView;
+    UIView *headView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, kScreenW, 200*kScreenW/375)];
+    [mainScrollView addSubview:headView];
+    self.headView=headView;
+    
+    mainScrollView.contentSize=CGSizeMake(0, kScreenH-49+150*kScreenW/375-60);
+    
+    DLRightImageButton *button=[[DLRightImageButton alloc]initWithFrame:CGRectMake(0, 30, kScreenW-200, 36)];
+    [button setImage:[UIImage imageNamed:@"downindex"] forState:UIControlStateNormal];
+    
+    button.centerX=headView.centerX;
+    [button setTitle:self.StoreInfo.name forState:UIControlStateNormal];
+    button.backgroundColor=rgba(0, 0, 0, 0.5);
+    button.layer.cornerRadius=18;
+    button.layer.masksToBounds=YES;
+    [button addTarget:self action:@selector(chioceList:) forControlEvents:UIControlEventTouchUpInside];
+    [headView addSubview:button];
+    [headView bringSubviewToFront:button];
+    
+ 
+    [self creatDateView];
+    UITableView *lefttableview=[[UITableView alloc]initWithFrame:CGRectMake(0,CGRectGetMaxY(self.dateView.frame) , 100, mainScrollView.contentSize.height-CGRectGetMaxY(self.dateView.frame)) style:UITableViewStylePlain];
+    lefttableview.separatorStyle=UITableViewCellSeparatorStyleNone;
+    lefttableview.delegate=self;
+    lefttableview.dataSource=self;
+    [mainScrollView addSubview:lefttableview];
+    self.lefttableView=lefttableview;
+    
+    UITableView *righttableview=[[UITableView alloc]initWithFrame:CGRectMake(100, CGRectGetMaxY(self.dateView.frame), kScreenW-100, mainScrollView.contentSize.height-CGRectGetMaxY(self.dateView.frame)) style:UITableViewStylePlain];
+    righttableview.separatorStyle=UITableViewCellSeparatorStyleNone;
+    righttableview.delegate=self;
+    righttableview.dataSource=self;
+    [mainScrollView addSubview:righttableview];
+    self.righttableView=righttableview;
+    
+    UIView *view=[[UIView alloc]initWithFrame:CGRectMake(CGRectGetMinX(self.righttableView.frame), CGRectGetMinY(self.righttableView.frame), CGRectGetWidth(self.righttableView.frame), 30)];
+    view.backgroundColor=[UIColor orangeColor];
+    view.hidden=YES;
+    [self.mainScrollView addSubview:view];
+    self.ServiceView=view;
+    
+    UIButton *serviceButton=[[UIButton alloc]initWithFrame:CGRectMake(view.width-130, 0, 120, 30)];
+    [serviceButton setTitle:@"本餐服务评价 >" forState:UIControlStateNormal];
+    serviceButton.titleLabel.font=font14;
+    [serviceButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+    [serviceButton addTarget:self action:@selector(goToCommit) forControlEvents:UIControlEventTouchUpInside];
+    [view addSubview:serviceButton];
+    
+    
+    [lefttableview registerNib:[UINib nibWithNibName:NSStringFromClass([DLAllergyCategaryTableViewCell class]) bundle:nil] forCellReuseIdentifier:@"left"];
+    [righttableview registerNib:[UINib nibWithNibName:NSStringFromClass([DLStoreFoodsTableViewCell class]) bundle:nil] forCellReuseIdentifier:@"foods"];
+    __weak typeof(self) unself=self;
+    mainScrollView.mj_header=[MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        [unself getData];
+    }];
+    [mainScrollView.mj_header beginRefreshing];
+    // Do any additional setup after loading the view.
+}
+#pragma mark--------选择日期
+- (void)checkDate:(UIButton *)sender{
+    DLEatingCalendarViewController *calendarVC=[[DLEatingCalendarViewController alloc]init];
+    calendarVC.currentdate=[self.formatter dateFromString:self.CurrentDate];
+    calendarVC.CanselectArray=self.canSelectArray;
+    __weak typeof(self) unself=self;
+    calendarVC.selectDate=^(NSDate *date){
+        if ([date compare:[NSDate date]]==NSOrderedAscending&&![[self.formatter stringFromDate:date]isEqualToString:[self.formatter stringFromDate:[NSDate date]]]) {
+            unself.IsGoOver=YES;
+            unself.righttableView.contentInset=UIEdgeInsetsMake(30, 0, 0, 0);
+            
+        }
+        else if (self.TimeButton.tag>[Globel getIndexFromCurrentDate]+1){
+            unself.IsGoOver=YES;
+            unself.righttableView.contentInset=UIEdgeInsetsMake(30, 0, 0, 0);
+        }
+        else
+        {
+            
+            unself.righttableView.contentInset=UIEdgeInsetsZero;
+        }
+        unself.ServiceView.hidden=!unself.IsGoOver;
+        unself.CurrentDate=[unself.formatter stringFromDate:date];
+        NSString *str=[NSString stringWithFormat:@"%@ (%@)",unself.CurrentDate,[Globel weekdayStringFromDate:[unself.formatter dateFromString:unself.CurrentDate]]];
+        [sender setAttributedTitle:[Globel returnAttributedstringFromstring:str andlocation:12 andLength:str.length-12 andAttributeStringColor:THEMECOLOR andFondSize:12] forState:UIControlStateNormal];
+        [unself.mainScrollView.mj_header beginRefreshing];
+    };
+    [self.navigationController pushViewController:calendarVC animated:YES];
+}
+#pragma mark-----------创建日期
+- (void)creatDateView{
+    UIView *dateView=[[UIView alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(self.headView.frame), kScreenW, 44)];
+    dateView.layer.borderWidth=1;
+    dateView.layer.borderColor=[UIColor lightGrayColor].CGColor;
+    [self.mainScrollView addSubview:dateView];
+    self.dateView=dateView;
+    UIButton *dateLabel=[[UIButton alloc]initWithFrame:CGRectMake(0, 0, kScreenW/2.0-0.5, dateView.height)];
+    dateLabel.titleLabel.textAlignment=NSTextAlignmentCenter;
+    dateLabel.titleLabel.font=font14;
+    [dateLabel setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    NSString *str=[NSString stringWithFormat:@"%@ (%@)",self.CurrentDate,[Globel weekdayStringFromDate:[self.formatter dateFromString:self.CurrentDate]]];
+    [dateLabel setAttributedTitle:[Globel returnAttributedstringFromstring:str andlocation:12 andLength:str.length-12 andAttributeStringColor:THEMECOLOR andFondSize:12] forState:UIControlStateNormal];
+    [dateLabel addTarget:self action:@selector(checkDate:) forControlEvents:UIControlEventTouchUpInside];
+    [dateView addSubview:dateLabel];
+    self.appearDateButton=dateLabel;
+    
+    UIView *lineview=[[UIView alloc]initWithFrame:CGRectMake(kScreenW/2.0-0.5, 7, 1, 30)];
+    lineview.backgroundColor=[UIColor lightGrayColor];
+    [dateView addSubview:lineview];
+    
+    UIButton *timeButton=[[UIButton alloc]initWithFrame:CGRectMake(kScreenW/2.0+0.5, 0, kScreenW/2.0-0.5, dateView.height)];
+    [timeButton setTitle:self.TimeArray[2*[Globel getIndexFromCurrentDate]] forState:UIControlStateNormal];
+    [timeButton setImage:[UIImage imageNamed:self.TimeArray[2*[Globel getIndexFromCurrentDate]+1]] forState:UIControlStateNormal];
+    [timeButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    timeButton.tag=[Globel getIndexFromCurrentDate]+1;
+    timeButton.titleLabel.font=font14;
+    [timeButton addTarget:self action:@selector(selectTime:) forControlEvents:UIControlEventTouchUpInside];
+    [dateView addSubview:timeButton];
+    self.TimeButton=timeButton;
+}
+#pragma mark----------选择时间段
+- (void)selectTime:(UIButton *)sender{
+    XMFDropBoxView *inputBox = [XMFDropBoxView dropBoxWithLocationView:sender dataSource:self];
+    __weak typeof(self) unself=self;
+    [inputBox selectItemWithBlock:^(NSUInteger index) {
+        //判断是不是大于当前时间段
+        if (!unself.IsGoOver) {
+            if (index<[Globel getIndexFromCurrentDate]) {
+                unself.IsGoOver=YES;
+                unself.righttableView.contentInset=UIEdgeInsetsMake(30, 0, 0, 0);
+            }
+            else
+                unself.righttableView.contentInset=UIEdgeInsetsZero;
+            unself.ServiceView.hidden=!unself.IsGoOver;
+        }
+        sender.tag=index+1;
+        [sender setTitle:unself.TimeArray[2*index] forState:UIControlStateNormal];
+        [sender setImage:[UIImage imageNamed:unself.TimeArray[2*index+1]] forState:UIControlStateNormal];
+        [unself.mainScrollView.mj_header beginRefreshing];
+    }];
+    [inputBox displayDropBox];
+
+}
+#pragma mark------------选择门店列表
+- (void)chioceList:(UIButton *)sender{
+    DLChioceStoreListViewController *listVC=[[DLChioceStoreListViewController alloc]init];
+    listVC.type=OtherType;
+    __weak typeof(self) unself=self;
+    listVC.selectStore=^(DLStoreListInfo *storeinfo){
+        unself.StoreInfo=storeinfo;
+        [sender setTitle:storeinfo.name forState:UIControlStateNormal];
+    };
+    [self.navigationController pushViewController:listVC animated:YES];
+}
+#pragma  mark--------数据代理
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    if (_lefttableView == tableView)
+    {
+        return 1;
+    }
+    else
+    {
+        return self.dataArray.count;
+    }
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    if (_lefttableView == tableView)
+    {
+        return self.dataArray.count;
+    }
+    else
+    {
+        DLStoreCategaryInfo *Info=self.dataArray[section];
+        return Info.dishesSupplyDtlList.count;
+    }
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (tableView==self.lefttableView) {
+        return 80;
+    }
+    return 100;
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (tableView==self.lefttableView) {
+        DLAllergyCategaryTableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:@"left" forIndexPath:indexPath];
+        cell.categaryInfo=self.dataArray[indexPath.row];
+        return cell;
+    }
+    else
+    {
+        DLStoreFoodsTableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:@"foods" forIndexPath:indexPath];
+        DLStoreCategaryInfo *info=self.dataArray[indexPath.section];
+        cell.isStore=self.IsGoOver;
+        cell.foodsInfo=info.dishesSupplyDtlList[indexPath.row];
+        __weak typeof(self) unself=self;
+        cell.commitBlock=^(DLStorefoodsInfo *foodsinfo){
+            DLFoodsCommitViewController *commitVC=[[DLFoodsCommitViewController alloc]init];
+            commitVC.eattime=unself.TimeButton.tag;
+            commitVC.currentDate=[[Globel getDateFormatter] stringFromDate:[unself.formatter dateFromString:unself.CurrentDate]];
+            commitVC.foodsinfo=foodsinfo;
+            [unself.navigationController pushViewController:commitVC animated:YES];
+        };
+        //        __weak typeof(self) unself=self;
+        return cell;
+    }
+    
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    if (_righttableView == tableView)
+    {
+        return 20;
+    }
+    return 0;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    if (_righttableView == tableView)
+    {
+        TableViewHeaderView *view = [[TableViewHeaderView alloc] initWithFrame:CGRectMake(0, 0, kScreenW, 20)];
+        DLStoreCategaryInfo *model = self.dataArray[section];
+        view.name.text = model.dishesTypeName;
+        return view;
+    }
+    return nil;
+}
+
+// TableView分区标题即将展示
+- (void)tableView:(UITableView *)tableView willDisplayHeaderView:(nonnull UIView *)view forSection:(NSInteger)section
+{
+    // 当前的tableView是RightTableView，RightTableView滚动的方向向上，RightTableView是用户拖拽而产生滚动的（（主要判断RightTableView用户拖拽而滚动的，还是点击LeftTableView而滚动的）
+    if ((_righttableView == tableView) && !_isScrollDown && _righttableView.dragging)
+    {
+        [self selectRowAtIndexPath:section];
+    }
+}
+
+
+// TableView分区标题展示结束
+- (void)tableView:(UITableView *)tableView didEndDisplayingHeaderView:(UIView *)view forSection:(NSInteger)section
+{
+    // 当前的tableView是RightTableView，RightTableView滚动的方向向下，RightTableView是用户拖拽而产生滚动的（（主要判断RightTableView用户拖拽而滚动的，还是点击LeftTableView而滚动的）
+    if ((_righttableView == tableView) && _isScrollDown && _righttableView.dragging)
+    {
+        [self selectRowAtIndexPath:section + 1];
+    }
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(nonnull NSIndexPath *)indexPath
+{
+    if (_lefttableView == tableView)
+    {
+        _selectIndex = indexPath.row;
+        [_righttableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:_selectIndex] atScrollPosition:UITableViewScrollPositionTop animated:YES];
+        [_lefttableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:_selectIndex inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:YES];
+    }
+    else
+    {
+        DLStoreCategaryInfo *info=self.dataArray[indexPath.section];
+        DLFoodDetailViewController *detailVC=[[DLFoodDetailViewController alloc]init];
+        detailVC.foodsinfo=info.dishesSupplyDtlList[indexPath.row];
+        [self.navigationController pushViewController:detailVC animated:YES];
+    }
+}
+
+// 当拖动右边TableView的时候，处理左边TableView
+- (void)selectRowAtIndexPath:(NSInteger)index
+{
+    [_lefttableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0] animated:YES scrollPosition:UITableViewScrollPositionTop];
+}
+#pragma mark -------------获取门店数据
+- (void)getData{
+    NSMutableDictionary *dic=[NSMutableDictionary dictionary];
+    dic.transCode=@"C0112";
+    dic.type=@"findAll";
+    [dic setObject:[DLUserInfo getUserStore].storeId forKey:@"storeId"];
+    [dic setObject:@(self.TimeButton.tag+20000) forKey:@"mealTypeCode"];
+    [dic setObject:[[Globel getDateFormatter] stringFromDate:[self.formatter dateFromString:self.CurrentDate]] forKey:@"templateDate"];
+    [dic setObject:@1 forKey:@"status"];
+    [[GLNetWorkManager shareManager]requestType:POST andURL:REQUESTURL andServers:GET_WORK_TYPE andParmas:dic andComplition:^(id response, BOOL isuccess) {
+        [self.mainScrollView.mj_header endRefreshing];
+        if (isuccess&&[response[@"code"] isEqualToString:SUCCESSCODE]) {
+            [self.dataArray removeAllObjects];
+            [DLStoreCategaryInfo mj_setupObjectClassInArray:^NSDictionary *{
+                return @{@"dishesSupplyDtlList":@"DLStorefoodsInfo"};
+            }];
+            
+            [DLStorefoodsInfo mj_setupObjectClassInArray:^NSDictionary *{
+                return @{@"accessoriesList":@"DLStorefoodsDetailInfo"};
+            }];
+            [self.dataArray addObjectsFromArray:[DLStoreCategaryInfo mj_objectArrayWithKeyValuesArray:response[@"json"][@"dishesSupplyList"]]];
+            self.canSelectArray=response[@"json"][@"tmplDateList"];
+            [self.lefttableView reloadData];
+            [self.righttableView reloadData];
+            if (self.dataArray.count) {
+                [self.lefttableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] animated:YES scrollPosition:UITableViewScrollPositionTop];
+            }
+            
+        }
+        
+        MyLog(@"%@",response);
+    }];
+}
+#pragma mark------------获取banner数据
+- (void)LoadBannerData{
+    NSMutableDictionary *dic=[NSMutableDictionary dictionary];
+    dic.transCode=@"M0073";
+    dic.type=@"store";
+    [dic setObject:@"1" forKey:@"tag"];
+    [dic setObject:@2 forKey:@"status"];
+    [dic setObject:@"storeId" forKey:self.StoreInfo.storeId];
+    [dic setObject:@"1" forKey:@"rotateWay"];
+    [[GLNetWorkManager shareManager]requestType:POST andURL:REQUESTURL andServers:GETBANNER andParmas:dic andComplition:^(id response, BOOL isuccess) {
+        MyLog(@"%@",response);
+        if (isuccess&&[response[@"code"] isEqualToString:@"000000"]) {
+            [self.imageArray addObjectsFromArray:[DLBannarImageInfo mj_objectArrayWithKeyValuesArray:response[@"imageUrl"]]];
+            __weak typeof(self) unself=self;
+            SZKRoundScrollView *barnarView=[SZKRoundScrollView roundScrollViewWithFrame:self.headView.bounds imageArr:self.imageArray timerWithTimeInterval:4.0 imageClick:^(NSInteger imageIndex) {
+                WKWebViewController *webview=[[WKWebViewController alloc]init];
+                webview.urlSring=unself.imageArray[imageIndex].linkUrl;
+                [unself.navigationController pushViewController:webview animated:YES];
+            }];
+            barnarView.curPageControlColor=[UIColor orangeColor];
+            [self.headView addSubview:barnarView];
+            [self.headView sendSubviewToBack:barnarView];
+            self.bannarView=barnarView;
+        }
+    }];
+}
+#pragma mark---------------底部联动
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    static CGFloat lastOffsetY = 0;
+    CGFloat mainscrollviewY=self.mainScrollView.contentOffset.y;
+    if (scrollView==self.righttableView) {
+        _isScrollDown = lastOffsetY < scrollView.contentOffset.y;
+        lastOffsetY = scrollView.contentOffset.y;
+        CGFloat contentoffsetY=scrollView.contentOffset.y;
+        if (contentoffsetY>=0&&contentoffsetY<150*kScreenW/375-60&&(mainscrollviewY<contentoffsetY||!_isScrollDown)) {
+            self.mainScrollView.contentOffset=CGPointMake(0, contentoffsetY);
+        }
+    }
+}
+
+#pragma mark-----DropDelegate
+- (NSUInteger)numberOfItemInDropBoxView:(XMFDropBoxView *)dropBoxView {
+    return self.TimeArray.count/2;
+}
+
+- (CGFloat)dropBoxView:(XMFDropBoxView *)dropBoxView heightForItemAtIndex:(NSUInteger)index {
+    return 44.f;
+}
+
+- (UIView *)dropBoxView:(XMFDropBoxView *)dropBoxView itemAtIndex:(NSUInteger)index {
+    
+    UIButton *timeButton=[UIButton buttonWithType:UIButtonTypeCustom];
+    [timeButton setTitle:self.TimeArray[2*index] forState:UIControlStateNormal];
+    [timeButton setImage:[UIImage imageNamed:self.TimeArray[2*index+1]] forState:UIControlStateNormal];
+    [timeButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    return timeButton;
+}
+
+- (CGFloat)widthInDropBoxView:(XMFDropBoxView *)dropBoxView {
+    return kScreenW/2.0;
+}
+
+#pragma mark----------去评论
+- (void)goToCommit{
+    DLServerCommitViewController *commitVC=[[DLServerCommitViewController alloc]init];
+    commitVC.eattime=self.TimeButton.tag;
+    commitVC.currentDate=[[Globel getDateFormatter] stringFromDate:[self.formatter dateFromString:self.CurrentDate]];
+    [self.navigationController pushViewController:commitVC animated:YES];
+}
+@end

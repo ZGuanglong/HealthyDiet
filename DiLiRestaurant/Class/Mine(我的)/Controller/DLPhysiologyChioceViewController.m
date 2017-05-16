@@ -1,0 +1,112 @@
+//
+//  DLPhysiologyChioceViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/15.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLPhysiologyChioceViewController.h"
+#import "DLCalendarView.h"
+#import "PPNumberButton.h"
+@interface DLPhysiologyChioceViewController ()
+@property(weak,nonatomic)DLCalendarView *calendarView;
+@property(weak,nonatomic)PPNumberButton *numButton;
+@end
+
+@implementation DLPhysiologyChioceViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title=@"您的生理期";
+    self.titleLabel.text=@"请选择您上次经期开始与结束日期";
+    NSArray *selectArray;
+    if (self.type==OtherType &&[DLUserInfo getUserDetail].periodStartTime) {
+        selectArray=@[[DLUserInfo getUserDetail].periodStartTime,[DLUserInfo getUserDetail].periodEndTime];
+    }
+    DLCalendarView *calendarView=[[DLCalendarView alloc]initWithFrame:CGRectMake(0, 60, kScreenW, 70+kScreenW/7*6) andSelectArray:selectArray];
+    [self.ContentView addSubview:calendarView];
+    self.calendarView=calendarView;
+    UIView *footView=[[UIView alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(calendarView.frame), kScreenW, 40)];
+    footView.backgroundColor=[UIColor whiteColor];
+    [self.ContentView addSubview:footView];
+    PPNumberButton *numberButton=[[PPNumberButton alloc]initWithFrame:CGRectMake(kScreenW-120, 5, 110, 30)];
+    numberButton.currentNumber=28;
+    numberButton.editing=NO;
+    numberButton.borderColor = [UIColor grayColor];
+    numberButton.increaseTitle = @"＋";
+    numberButton.decreaseTitle = @"－";
+    
+    numberButton.resultBlock =^(NSInteger number, BOOL increaseStatus/* 是否为加状态*/){
+        MyLog(@"%lu",number);
+    };
+    [footView addSubview:numberButton];
+    self.numButton=numberButton;
+    
+    UILabel *label=[[UILabel alloc]initWithFrame:CGRectMake(10, CGRectGetMinY(numberButton.frame), kScreenW-140, 30)];
+    label.textAlignment=NSTextAlignmentRight;
+    label.text=@"请修改月经周期:";
+    [footView addSubview:label];
+    
+    self.doneButton.frame=CGRectMake(50, CGRectGetMaxY(footView.frame)+20, kScreenW-100, 44);
+    [self.ContentView addSubview:self.doneButton];
+    self.ContentView.contentSize=CGSizeMake(kScreenW, CGRectGetMaxY(self.doneButton.frame)+20);
+    if (self.type==FirstType) {
+        self.skipButton.frame=CGRectMake(50, CGRectGetMaxY(self.doneButton.frame)+20, kScreenW-100, 44);
+        [self.ContentView addSubview:self.skipButton];
+        self.ContentView.contentSize=CGSizeMake(kScreenW, CGRectGetMaxY(self.skipButton.frame)+20);
+    }
+    // Do any additional setup after loading the view.
+}
+
+- (void)done
+{
+    [super done];
+    if (self.type==FirstType) {
+
+        if (self.calendarView.OutDateArray.count==2) {
+            [DLUser share].periodStartTime=self.calendarView.OutDateArray.firstObject;
+            [DLUser share].periodEndTime=self.calendarView.OutDateArray.lastObject;
+            [DLUser share].periodNum=[NSString stringWithFormat:@"%lu",self.numButton.currentNumber];
+            
+        }
+        DLMineBaseViewController *baseVC=[[NSClassFromString(@"DLOtherDemandViewController")alloc]init];
+        baseVC.type=FirstType;
+        [self.navigationController pushViewController:baseVC animated:YES];
+        
+    }
+    else
+    {
+        if (self.calendarView.OutDateArray.count==2) {
+            [self updateInfo];
+        }
+        else
+        {
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+        
+    }
+}
+
+
+- (void)updateInfo
+{
+    
+    NSMutableDictionary *updatedic=[NSMutableDictionary dictionary];
+    [updatedic setObject:@"C0100" forKey:@"transCode"];
+    [updatedic setObject:@"update" forKey:@"type"];
+    [updatedic setObject:[DLUserInfo getUser].userId forKey:@"userId"];
+    [updatedic setObject:@"" forKey:@"specialCrowdCode"];
+    [updatedic setObject:self.calendarView.OutDateArray.firstObject forKey:@"periodStartTime"];
+    [updatedic setObject:self.calendarView.OutDateArray.lastObject   forKey:@"periodEndTime"];
+    [updatedic setObject:@(self.numButton.currentNumber)  forKey:@"periodNum"];
+    [[GLNetWorkManager shareManager]requestType:POST andURL:REQUESTURL andServers:GET_WORK_TYPE andParmas:updatedic andComplition:^(id response, BOOL isuccess) {
+        if (isuccess&&[response[@"code"] isEqualToString:SUCCESSCODE]) {
+            self.returnValue=[self.calendarView.OutDateArray componentsJoinedByString:@"至"];
+                [self getuserinfo];
+            }
+    }];
+    
+}
+
+@end

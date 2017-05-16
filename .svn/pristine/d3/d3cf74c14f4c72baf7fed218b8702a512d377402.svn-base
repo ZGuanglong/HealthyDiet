@@ -1,0 +1,195 @@
+//
+//  DLFoodDetailViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/4/6.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLFoodDetailViewController.h"
+#import "DLStorefoodsDetailInfo.h"
+@interface DLFoodDetailViewController ()
+
+@property(nonatomic,strong)UIView * tableHeaderView;
+
+@property(strong,nonatomic)DLStorefoodsDetailInfo *detailfoodInfo;
+@end
+
+@implementation DLFoodDetailViewController
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+    [self.navigationController setNavigationBarHidden:YES animated:YES];
+    //    self.navigationController.navigationBarHidden=YES;
+}
+- (UIStatusBarStyle)preferredStatusBarStyle
+{
+    return UIStatusBarStyleLightContent;
+}
+-(UIView *)tableHeaderView{
+    if (!_tableHeaderView) {
+        _tableHeaderView=[[UIImageView alloc]initWithFrame:CGRectMake(0, 0,kScreenW, 300*kScreenW/375)];
+        _tableHeaderView.userInteractionEnabled=YES;
+    }
+    return _tableHeaderView;
+}
+
+-(UIImageView *)imageView{
+    if (!_imageView) {
+        _imageView=[[UIImageView alloc]initWithFrame:CGRectMake(0, 0, kScreenW, 300*kScreenW/375)];
+        _imageView.autoresizingMask=UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        _imageView.clipsToBounds=YES;
+        [_imageView sd_setImageWithURL:[NSURL URLWithString:self.foodsinfo.imagesURL] placeholderImage:[UIImage imageNamed:@"food_detail_default"]];
+        _imageView.userInteractionEnabled=YES;
+        _imageView.contentMode=UIViewContentModeScaleAspectFill;
+    }
+    return _imageView;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self.tableHeaderView addSubview:self.imageView];
+    self.tableView.height+=64;
+    self.tableView.tableHeaderView=self.tableHeaderView;
+    UILabel *namelabel=[[UILabel alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(self.tableHeaderView.frame)-60, kScreenW, 60)];
+    namelabel.backgroundColor=rgba(0, 0, 0, 0.6);
+    namelabel.textColor=[UIColor whiteColor];
+    namelabel.font=font20;
+    namelabel.text=[NSString stringWithFormat:@"    %@",self.foodsinfo.dishesName];
+    [self.tableHeaderView addSubview:namelabel];
+    UIButton *backbutton=[[UIButton alloc]initWithFrame:CGRectMake(20, 10, 30, 30)];
+    backbutton.layer.cornerRadius=15;
+    backbutton.layer.masksToBounds=YES;
+    [backbutton setImage:[UIImage imageNamed:@"navigationbar_back"] forState:UIControlStateNormal];
+    backbutton.backgroundColor=rgba(0, 0, 0, 0.6);
+    [self.tableHeaderView addSubview:backbutton];
+    [backbutton addTarget:self action:@selector(back) forControlEvents:UIControlEventTouchUpInside];
+    [self getdata];
+}
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    CGPoint offset = scrollView.contentOffset;
+    if (offset.y < 0) {
+        CGRect rect =self.tableHeaderView.frame;
+        rect.origin.y = offset.y;
+        rect.size.height =CGRectGetHeight(rect)-offset.y;
+        self.imageView.frame = rect;
+        self.tableHeaderView.clipsToBounds=NO;
+    }
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return self.detailfoodInfo==nil?0:2;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    if (!section) {
+        return 3;
+    }
+    else
+        return 1;
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (!indexPath.section) {
+        static NSString *cellID=@"cell00";
+        UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:cellID];
+        if (!cell) {
+            cell=[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
+            cell.selectionStyle=UITableViewCellSelectionStyleNone;
+            UIView *lineView=[[UIView alloc]initWithFrame:CGRectMake(0, [self tableView:tableView heightForRowAtIndexPath:indexPath], kScreenW, 1)];
+            lineView.backgroundColor=BackGroundColor;
+            [cell.contentView addSubview:lineView];
+        }
+        switch (indexPath.row) {
+            case 0:
+                cell.textLabel.text=[NSString stringWithFormat:@"主料:   %@",self.foodsinfo.ingredients.foodName];
+                break;
+            case 1:
+                cell.textLabel.text=[NSString stringWithFormat:@"调料:   %@",self.detailfoodInfo.seasoningsName];
+                break;
+            case 2:
+                cell.textLabel.text=[NSString stringWithFormat:@"食用油:  %@",self.foodsinfo.oil.foodName];
+            default:
+                break;
+        }
+        return cell;
+
+    }
+    else
+    {
+        static NSString *cellID=@"cell1";
+        UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:cellID];
+        if (!cell) {
+            cell=[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
+            cell.selectionStyle=UITableViewCellSelectionStyleNone;
+        }
+        NSArray *array=@[[NSString stringWithFormat:@"能量\n%.01fkal",self.detailfoodInfo.energyKC],
+                         [NSString stringWithFormat:@"蛋白质\n%.01fg",self.detailfoodInfo.protein],
+                         [NSString stringWithFormat:@"碳水化合物\n%.01fg",self.detailfoodInfo.carbohydrates],
+                         [NSString stringWithFormat:@"脂肪\n%.01fg",self.detailfoodInfo.fat]];
+        CGFloat labelW=kScreenW/2;
+        for (int i=0; i<array.count; i++) {
+            UILabel *label=[[UILabel alloc]initWithFrame:CGRectMake(i%2*labelW, i/2*60, labelW, 60)];
+            label.numberOfLines=0;
+            label.textAlignment=NSTextAlignmentCenter;
+            label.font=font14;
+            NSString *str=array[i];
+            NSInteger index=[str rangeOfString:@"\n"].location;
+            label.attributedText=[Globel returnAttributedstringFromstring:array[i] andlocation:index andLength:str.length-index andAttributeStringColor:THEMECOLOR andFondSize:14];
+            label.layer.borderColor=[UIColor lightGrayColor].CGColor;
+            label.layer.borderWidth=0.5;
+            [cell.contentView addSubview:label];
+            
+        }
+        return cell;
+
+    }
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section) {
+        return 120;
+    }
+    return 44;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    if (section) {
+        return 60;
+    }
+    return 0;
+}
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    UIView *view=[[UIView alloc]init];
+    DLRoundEdgeLabel *label=[[DLRoundEdgeLabel alloc]initWithFrame:CGRectMake(20, 10, 200, 40)];
+    label.text=@"每100g含有的能量及营养素";
+    label.font=font14;
+    label.textColor=[UIColor whiteColor];
+    label.backgroundColor=THEMECOLOR;
+    [view addSubview:label];
+    return view;
+}
+- (void)getdata{
+    NSMutableDictionary *dic=[NSMutableDictionary dictionary];
+    dic.transCode=@"M0067";
+    dic.type=@"findDetail";
+    [dic setObject:@(self.foodsinfo.dishesCode) forKey:@"dishesCode"];
+    [[GLNetWorkManager shareManager]requestType:POST andURL:REQUESTURL andServers:GET_WORK_TYPE andParmas:dic andComplition:^(id response, BOOL isuccess) {
+        if (isuccess&&[response[@"code"] isEqualToString:SUCCESSCODE]) {
+            self.detailfoodInfo=[DLStorefoodsDetailInfo mj_objectWithKeyValues:response];
+            [self.tableView reloadData];
+        }
+    }];
+
+}
+- (void)back{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+@end

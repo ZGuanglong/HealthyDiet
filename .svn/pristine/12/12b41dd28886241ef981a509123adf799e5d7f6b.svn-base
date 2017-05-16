@@ -1,0 +1,65 @@
+//
+//  DLServerCenterViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/4/14.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLServerCenterViewController.h"
+
+@interface DLServerCenterViewController ()
+
+
+
+@end
+
+@implementation DLServerCenterViewController
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:NO animated:YES];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title=@"服务中心";
+    [self.dataArray addObjectsFromArray:@[@"iv_help",@"帮助中心",instructionUrL,@"iv_about",@"关于",aboutUsUrL]];
+    // Do any additional setup after loading the view.
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.dataArray.count/3;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 55;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *cellID=@"cell0";
+    UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:cellID];
+    if (!cell) {
+        cell=[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
+        cell.selectionStyle=UITableViewCellSelectionStyleNone;
+        UIView *lineview=[[UIView alloc]initWithFrame:CGRectMake(10, [self tableView:tableView heightForRowAtIndexPath:indexPath]-0.5, kScreenW-20, 0.5)];
+        lineview.backgroundColor=shouldgraycolor;
+        [cell.contentView addSubview:lineview];
+    }
+    cell.imageView.image=[UIImage imageNamed:self.dataArray[indexPath.row*3]];
+    cell.textLabel.text=self.dataArray[indexPath.row*3+1];
+    cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+    return cell;
+    
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    WKWebViewController *webView=[[WKWebViewController alloc]init];
+    webView.urlSring=[REQUEHTML5STURL stringByAppendingString:self.dataArray[indexPath.row*3+2]];
+    [self.navigationController pushViewController:webView animated:YES];
+}
+@end

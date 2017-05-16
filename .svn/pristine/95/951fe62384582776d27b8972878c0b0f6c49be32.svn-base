@@ -1,0 +1,114 @@
+//
+//  DLSexChioceViewController.m
+//  DiLiRestaurant
+//
+//  Created by 地利 on 2017/3/15.
+//  Copyright © 2017年 地利. All rights reserved.
+//
+
+#import "DLSexChioceViewController.h"
+#import "DLBottomTitleButton.h"
+@interface DLSexChioceViewController ()
+@property(weak,nonatomic)DLBottomTitleButton *selectbutton;
+@end
+
+@implementation DLSexChioceViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+    UIView *bgView=[[UIView alloc]init];
+    bgView.backgroundColor=[UIColor whiteColor];
+    [self.ContentView addSubview:bgView];
+    self.titleLabel.text=@"你的性别?";
+    self.baseValue=[DLUserInfo getUser].sex;
+//    [self.view updateConstraintsIfNeeded];
+    [bgView mas_makeConstraints:^(MASConstraintMaker *make) {
+        (void)make.left;
+        (void)make.right;
+        make.top.mas_equalTo(self.titleLabel.mas_bottom).mas_offset(20);
+        make.height.mas_equalTo(bgView.mas_width).multipliedBy(0.6);
+    }];
+    UIView *lineview=[[UIView alloc]init];
+    lineview.backgroundColor=shouldgraycolor;
+    [bgView addSubview:lineview];
+    
+    [lineview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(20);
+        make.bottom.mas_equalTo(@(-20));
+        make.centerX.mas_equalTo(@(bgView.width/2));
+        make.width.mas_equalTo(@1);
+    }];
+    
+    DLBottomTitleButton *boyButton=[[DLBottomTitleButton alloc]init];
+    [boyButton setImage:[UIImage imageNamed:@"sex_boy_unselect"] forState:UIControlStateNormal];
+    [boyButton setImage:[UIImage imageNamed:@"sex_boy_select"] forState:UIControlStateSelected];
+    [boyButton setTitle:@"男" forState:UIControlStateNormal];
+    [boyButton setTitle:@"男" forState:UIControlStateSelected];
+    [bgView addSubview:boyButton];
+    boyButton.tag=1001;
+    
+    [boyButton addTarget:self action:@selector(selectSex:) forControlEvents:UIControlEventTouchUpInside];
+    [boyButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(@20);
+        make.right.mas_equalTo(lineview.mas_left).mas_offset(-20);
+        make.bottom.mas_equalTo(@(-20));
+        make.width.mas_equalTo(boyButton.mas_height).multipliedBy(0.6);
+    }];
+    
+    DLBottomTitleButton *girlButton=[[DLBottomTitleButton alloc ]init];
+    [girlButton setImage:[UIImage imageNamed:@"sex_gril_unselect"] forState:UIControlStateNormal];
+    [girlButton setImage:[UIImage imageNamed:@"sex_girl_select"] forState:UIControlStateSelected];
+    [girlButton setTitle:@"女" forState:UIControlStateNormal];
+    [girlButton setTitle:@"女" forState:UIControlStateSelected];
+    [bgView addSubview:girlButton];
+    girlButton.tag=1000;
+    [girlButton addTarget:self action:@selector(selectSex:) forControlEvents:UIControlEventTouchUpInside];
+    [girlButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(@20);
+        make.left.mas_equalTo(lineview.mas_right).mas_offset(20);
+        make.bottom.mas_equalTo(@(-20));
+        make.width.mas_equalTo(girlButton.mas_height).multipliedBy(0.6);
+    }];
+    if (self.baseValue.intValue) {
+        boyButton.selected=YES;
+        self.selectbutton=boyButton;
+    }
+    else if (!strIsEmpty(self.baseValue)){
+        girlButton.selected=YES;
+        self.selectbutton=girlButton;
+    }
+    [self.ContentView addSubview:self.doneButton];
+    [self.doneButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.mas_equalTo(@50);
+        make.top.mas_equalTo(bgView.mas_bottom).mas_offset(40);
+        make.right.mas_equalTo(@(-50));
+        make.height.mas_equalTo(@44);
+    }];
+    
+    // Do any additional setup after loading the view.
+}
+
+- (void)selectSex:(DLBottomTitleButton *)sender{
+    self.selectbutton.selected=NO;
+    sender.selected=YES;
+    self.selectbutton=sender;
+}
+
+- (void)done{
+    [super done];
+    if (self.selectbutton!=nil) {
+        if (self.type==OtherType) {
+            [self updateInfofromKey:@"sex" andValue:[NSString stringWithFormat:@"%lu",self.selectbutton.tag-1000]];
+        }
+        else
+        {
+            [DLUser share].sex=[NSString stringWithFormat:@"%lu",self.selectbutton.tag-1000];
+            DLMineBaseViewController *baseVC=[[NSClassFromString(@"DLBrithdayChioceViewController")alloc]init];
+            baseVC.type=FirstType;
+            [self.navigationController pushViewController:baseVC animated:YES];
+        }
+
+    }
+}
+@end

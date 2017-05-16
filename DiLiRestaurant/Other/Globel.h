@@ -1,0 +1,247 @@
+//  Globel.h
+//  DaYoERP
+//
+//  Created by 财神软件 on 16/10/17.
+//  Copyright © 2016年 财神软件. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface Globel : NSObject
+//#ifdef DEBUG
+//#define REQUESTURL @"http://192.168.100.67:8081"
+//#define REQUEHTML5STURL @"http://192.168.100.67:8063"
+//
+//#else
+#define REQUESTURL @"http://116.90.83.216:8081"
+#define REQUEHTML5STURL @"http://h5app.ypp2015.com"
+//#endif
+#define Randem  [NSString stringWithFormat:@"%@%@%i",[Globel UUID],[Globel timeStamp],arc4random_uniform(10000)]
+//百度appkey                                                         
+#define BAIDUAPPKEY @"VkXtqLx7tuWTSMuIM3CYO2kF5MWdkGnl"
+
+#define UmengAPPKEY @"58d2391b8f4a9d46cf0012a5"
+
+#define WXAppId @"wx57bab20b0ee31151"
+
+#define WX_APPSECRET @"d5bd7936a9c2b17c600d23202fe7b8ea"
+
+#define QQ_APPID @"1105618804"
+
+#define QQ_KEY @"y01Gq1iwsPFeX64n"
+
+#define WB_APPID @"3794248804"
+
+#define WB_SECRET @"a248424fa71210d550dc49792e7da105"
+typedef enum {
+    FirstType,//第一次进入
+    OtherType//其他时候进入
+} ChioceType;
+
+typedef enum:NSInteger
+{
+    PersonalType=0,
+    TeamType=1,
+    NoneType=2
+}VersionType;
+
+typedef enum :NSInteger{
+    StoreType=1,
+    CustomType=2
+}EatChoiceType;
+
+typedef enum :NSInteger{
+    BreakFastType=1,
+    LunchType=2,
+    DinerType=3
+}EatTimeType;
+
+
+
+/**
+ 成功的code
+ */
+#define SUCCESSCODE @"000000"
+#define PAGESIZE 10
+#define BadgeNumber @"BadgeNumber"
+#define kAlphaNum  @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"/**
+ latitude;
+ longitude;
+ */
+#define USERLOCATIONLONG @"userlocationlongitude"
+#define USERLOCATIONLAT  @"userlocationlatitude"
+//验证手机号正则
+#define phoneRegex @"((13[0-9])|14[7]|(15[^4,\\D])|17[6,7,8]|(18[0-9]))\\d{8}$"
+#define strIsEmpty(str) ([str isEqualToString:@"null"] || [str isEqualToString:@"<null>"] || [str isKindOfClass:[NSNull class]] || str == nil || [str length]<1 ? YES : NO )
+#define kScreenW [UIScreen mainScreen].bounds.size.width
+#define kScreenH [UIScreen mainScreen].bounds.size.height
+#define RGBColor(r, g, b) [UIColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:1.0]
+#define topRedColor [UIColor colorWithRed:228/255.0 green:65/255.0 blue:67/255.0 alpha:1.0]
+#define shouldgraycolor [UIColor colorWithRed:203/255.0 green:203/255.0 blue:203/255.0 alpha:1.0]
+#define shouldbluecolor [UIColor colorWithRed:31/255.0 green:134/255.0 blue:200/255.0 alpha:1]
+
+#define BackGroundColor RGBColor(239,240,241)
+// 随机色
+#define rgba(r,g,b,a) [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:a]
+
+#define RandomColor RGBColor(arc4random_uniform(256), arc4random_uniform(256), arc4random_uniform(256))
+#define homepadding 20
+#define itemPerLine 4
+#define kItemW (kScreenW-homepadding*(itemPerLine+1))/itemPerLine
+#define kItemH 25
+//字体大小
+#define font12 [UIFont systemFontOfSize:12]
+#define font14 [UIFont systemFontOfSize:14]
+#define font15 [UIFont systemFontOfSize:15]
+#define font16 [UIFont systemFontOfSize:16]
+#define font17 [UIFont systemFontOfSize:17]
+#define font18 [UIFont systemFontOfSize:18]
+#define font19 [UIFont systemFontOfSize:19]
+#define font20 [UIFont systemFontOfSize:20]
+
+
+#define KratioWIDTH [UIScreen mainScreen].bounds.size.width/375.0
+#define KratioHEIGHT [UIScreen mainScreen].bounds.size.height/667.0
+
+#define THEMECOLOR RGBColor(116, 158, 63)
+
+#define MAGIN 20
+
+#define ViewRect CGRectMake(0, 0, kScreenW, kScreenH-64)
+
+/**
+ *  获取字符串的高
+ *
+ *  @param string   字符串
+ *  @param width    最大宽度
+ *  @param height   最大高度
+ *  @param fontSize 字体大小
+ *
+ *  @return 大小区域
+ */
++ (CGSize)getSizeOfString:(NSString *)string maxWidth:(float)width maxHeight:(float)height withFontSize:(CGFloat)fontSize;
++(NSString *)UUID;
++ (NSString*)dictionaryToJson:(NSDictionary *)dic;
+
++(UIImage *)imageFromImageStr:(NSString *)str;
+
++ (NSString *)timeStamp;
+/**
+ *  获取每个月多少天
+ *
+ *  @param year  年
+ *  @param month 月
+ *
+ *  @return 天数
+ */
++ (NSInteger)howManyDaysInThisYear:(NSInteger)year withMonth:(NSInteger)month;
+
+/**
+ *  带颜色字符串
+ *
+ *  @param string   原字符窜
+ *  @param location 添加属性的开始位置
+ *  @param length   长度
+ *  @param color    颜色
+ *  @param size     字体大小
+ *
+ *  @return 带属性字符窜
+ */
++ (NSMutableAttributedString*)returnAttributedstringFromstring:(NSString *)string andlocation:(NSInteger)location andLength:(NSInteger)length andAttributeStringColor:(UIColor *)color andFondSize:(NSInteger)size;
+/**
+ *  比较两个时间的大小
+ *
+ *  @param firstDate  第一个时间
+ *  @param secondDate 第二个时间
+ *
+ *  @return 第一个是否大于第二个时间
+ */
++ (BOOL)compareToDate:(NSDate *)firstDate WithDate:(NSDate *)secondDate;
+
+
+
+
+/**
+ //判断手机号码格式是否正确
+
+ @param mobileNum 手机号
+
+ @return yes是手机号
+ */
++ (BOOL)valiMobile:(NSString *)mobileNum;
+
+/**
+ *  带下划线的字符窜
+ *
+ *  @param str      原字符
+ *  @param color    颜色
+ *  @param fontsize 大小
+ *
+ *  @return 带属性的字符串
+ */
+
++(NSMutableAttributedString*)addbottonlineWithString:(NSString *)str andstrColor:(UIColor *)color andFontsize:(NSInteger)fontsize;
+
++(BOOL)HasPowerFromArray:(NSDictionary *)dic and:(NSString *)str;
+
+/**
+ ** lineView:       需要绘制成虚线的view
+ ** lineLength:     虚线的宽度
+ ** lineSpacing:    虚线的间距
+ ** lineColor:      虚线的颜色
+ **/
++ (void)drawDashLine:(UIView *)lineView lineLength:(int)lineLength lineSpacing:(int)lineSpacing lineColor:(UIColor *)lineColor;
+
++(NSString *)telephoneArrayFromString:(NSString *)telephone;
+
++ (NSString *)getEalyYear;
+
++(NSString *)getNowDay;
+
+/**
+ 显示的性别
+
+ @param sexcode 性别code 0:女 1:男
+
+ @return 男  女  @""
+ */
++(NSString *)apperaSex:(NSString *)sexcode;
+
+/**
+ 通过生日获取年龄
+
+ @param brithdate 生日
+
+ @return 年龄
+ */
++ (NSInteger)getAge:(NSString*)brithdate;
+
++(NSDateFormatter *)getDateFormatter;
+
+/**
+ 获取周几
+
+ @param inputDate 日期
+
+ @return 周几
+ */
++ (NSString*)weekdayStringFromDate:(NSDate*)inputDate;
+
+/**
+ 获取就餐时间段信息
+
+ @return 0早餐 1午餐 2晚餐
+ */
++ (NSInteger)getIndexFromCurrentDate;
+
+/**
+ 获取健步走的时间段
+
+ @return 时间段
+ */
++(NSInteger)getStepTimeStageFromCurrentDate;
+
++ (NSString *)getUserInfoIcon;
+
+
+@end
